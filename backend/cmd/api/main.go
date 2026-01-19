@@ -1,0 +1,100 @@
+package main
+
+import (
+	"log"
+	"os"
+	"time"
+
+	"github.com/StartUp/safecampus/backend/Delivery/handlers"
+	"github.com/StartUp/safecampus/backend/Delivery/routers"
+	infrastructure "github.com/StartUp/safecampus/backend/Infrastructure"
+	repositories "github.com/StartUp/safecampus/backend/Repositories"
+	usecases "github.com/StartUp/safecampus/backend/Usecases"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	// Load .env file if it exists (for local development)
+	_ = godotenv.Load()
+
+	// 1. Database Connection
+	mongoURI := os.Getenv("MONGO_URI")
+	if mongoURI == "" {
+		// Fallback for local testing if env is not provided.
+		// For Render, you MUST set MONGO_URI in the interface.
+		mongoURI = "mongodb://localhost:27017"
+		log.Println("MONGO_URI not set, using default: " + mongoURI)
+	}
+
+	client, err := infrastructure.NewMongoClient(mongoURI)
+	if err != nil {
+		log.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+
+	// Use the "safecampus" database
+	db := client.Database("safecampus")
+
+	// 2. Initialize Repositories
+	userRepo := repositories.NewUserRepository(db)
+	alertRepo := repositories.NewAlertRepository(db)
+	reportRepo := repositories.NewReportRepository(db)
+	chatRepo := repositories.NewChatRepository(db)
+	zoneRepo := repositories.NewZoneRepository(db)
+	walkRepo := repositories.NewWalkRepository(db)
+	timerRepo := repositories.NewSafetyTimerRepository(db)
+
+	// 3. Initialize Usecases
+	timeout := time.Second * 2
+
+	userUsecase := usecases.NewUserUsecase(userRepo, timeout)
+	alertUsecase := usecases.NewAlertUsecase(alertRepo, userRepo, timeout)
+	reportUsecase := usecases.NewReportUsecase(reportRepo, timeout)
+	chatUsecase := usecases.NewChatUsecase(chatRepo, timeout)
+	zoneUsecase := usecases.NewZoneUsecase(zoneRepo, timeout)
+	walkUsecase := usecases.NewWalkUseCase(walkRepo)
+	timerUsecase := usecases.NewSafetyTimerUsecase(timerRepo, timeout)
+
+	// 4. Initialize Handlers
+	userHandler := handlers.NewUserHandler(userUsecase)
+	alertHandler := handlers.NewAlertHandler(alertUsecase)
+	reportHandler := handlers.NewReportHandler(reportUsecase)
+	chatHandler := handlers.NewChatHandler(chatUsecase)
+	zoneHandler := handlers.NewZoneHandler(zoneUsecase)
+	walkHandler := handlers.NewWalkHandler(walkUsecase)
+	timerHandler := handlers.NewSafetyTimerHandler(timerUsecase)
+
+	// 5. Setup Router
+	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler)
+
+	// Register Friend Walk Routes
+	walkRoutes := r.Group("/walks")
+	{
+		walkRoutes.POST("/start", walkHandler.StartWalk)
+		walkRoutes.POST("/:id/location", walkHandler.UpdateLocation)
+		walkRoutes.POST("/:id/end", walkHandler.EndWalk)
+	}
+
+	// Register Safety Timer Routes
+	timerRoutes := r.Group("/timers")
+	{
+		timerRoutes.POST("", timerHandler.SetTimer)
+		timerRoutes.POST("/:id/cancel", timerHandler.CancelTimer)
+	}
+
+	// Register Chat Routes
+	chatRoutes := r.Group("/chats")
+	{
+		chatRoutes.POST("/messages", chatHandler.SendMessage)
+		chatRoutes.GET("/:report_id/messages", chatHandler.GetHistory)
+	}
+
+	// 6. Run Server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Println("SafeCampus Backend running on port " + port)
+	if err := r.Run(":" + port); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
+	}
+}
