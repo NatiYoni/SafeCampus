@@ -64,29 +64,7 @@ func main() {
 	timerHandler := handlers.NewSafetyTimerHandler(timerUsecase)
 
 	// 5. Setup Router
-	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler)
-
-	// Register Friend Walk Routes
-	walkRoutes := r.Group("/walks")
-	{
-		walkRoutes.POST("/start", walkHandler.StartWalk)
-		walkRoutes.POST("/:id/location", walkHandler.UpdateLocation)
-		walkRoutes.POST("/:id/end", walkHandler.EndWalk)
-	}
-
-	// Register Safety Timer Routes
-	timerRoutes := r.Group("/timers")
-	{
-		timerRoutes.POST("", timerHandler.SetTimer)
-		timerRoutes.POST("/:id/cancel", timerHandler.CancelTimer)
-	}
-
-	// Register Chat Routes
-	chatRoutes := r.Group("/chats")
-	{
-		chatRoutes.POST("/messages", chatHandler.SendMessage)
-		chatRoutes.GET("/:report_id/messages", chatHandler.GetHistory)
-	}
+	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler, walkHandler, timerHandler)
 
 	// 6. Run Server
 	port := os.Getenv("PORT")

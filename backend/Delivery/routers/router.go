@@ -11,6 +11,8 @@ func SetupRouter(
 	reportHandler *handlers.ReportHandler,
 	chatHandler *handlers.ChatHandler,
 	zoneHandler *handlers.ZoneHandler,
+	walkHandler *handlers.WalkHandler,
+	timerHandler *handlers.SafetyTimerHandler,
 ) *gin.Engine {
 	r := gin.Default()
 
@@ -30,11 +32,20 @@ func SetupRouter(
 		api.GET("/reports", reportHandler.GetReports)
 
 		// Chat routes
-		api.POST("/chat", chatHandler.SendMessage)
-		api.GET("/chat/:reportId", chatHandler.GetHistory)
+		api.POST("/chats/messages", chatHandler.SendMessage)
+		api.GET("/chats/:reportId/messages", chatHandler.GetHistory)
 
 		// Zone Check (Simulating Geofence background check)
 		api.POST("/zone/check", zoneHandler.CheckZone)
+
+		// Walk routes
+		api.POST("/walks/start", walkHandler.StartWalk)
+		api.POST("/walks/:id/location", walkHandler.UpdateLocation)
+		api.POST("/walks/:id/end", walkHandler.EndWalk)
+
+		// Safety Timer routes
+		api.POST("/timers", timerHandler.SetTimer)
+		api.POST("/timers/:id/cancel", timerHandler.CancelTimer)
 	}
 
 	return r
