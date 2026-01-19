@@ -1,0 +1,156 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../bloc/emergency_bloc.dart';
+import '../bloc/emergency_event.dart';
+import '../bloc/emergency_state.dart';
+
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Safe Campus'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.chat),
+            onPressed: () {
+              // Open Chat
+            },
+          ),
+        ],
+      ),
+      body: BlocConsumer<EmergencyBloc, EmergencyState>(
+        listener: (context, state) {
+          if (state is SosTriggered) {
+             ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('SOS Signal Received! Help is on the way.'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 5),
+              ),
+            );
+          } else if (state is EmergencyError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${state.message}'), backgroundColor: Colors.red),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is EmergencyLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          return Column(
+            children: [
+              // Emergency SOS Section
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: GestureDetector(
+                    onLongPress: () {
+                      // Trigger SOS on Long Press
+                      context.read<EmergencyBloc>().add(const TriggerSosEvent("user-123")); // Use actual User ID later
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Sending SOS Location...')),
+                      );
+                    },
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withOpacity(0.5),
+                            blurRadius: 20,
+                            spreadRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.sos, size: 60, color: Colors.white),
+                          Text(
+                            'HOLD FOR SOS',
+                            style: TextStyle(
+                                color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Features Grid
+          Expanded(
+            flex: 2,
+            child: GridView.count(
+              crossAxisCount: 2,
+              padding: const EdgeInsets.all(16),
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              children: [
+                _buildFeatureCard(
+                  context,
+                  Icons.directions_walk, 
+                  'Friend Walk', 
+                  Colors.green,
+                  () => context.push('/friend-walk'),
+                ),
+                _buildFeatureCard(
+                  context, 
+                  Icons.warning, 
+                  'Report Hazard', 
+                  Colors.orange,
+                  () => context.push('/report'),
+                ),
+                _buildFeatureCard(
+                  context, 
+                  Icons.access_time, 
+                  'Safety Timer', 
+                  Colors.blue, 
+                  () => context.push('/safety-timer'),
+                ),
+                _buildFeatureCard(context, Icons.psychology, 'Mental Health', Colors.purple, () {}),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureCard(BuildContext context, IconData icon, String title, Color color, VoidCallback onTap) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              backgroundColor: color.withOpacity(0.2),
+              radius: 30,
+              child: Icon(icon, size: 30, color: color),
+            ),
+            const SizedBox(height: 12),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+}
