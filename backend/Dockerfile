@@ -1,5 +1,5 @@
 # Start from a small, secure base image
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Install git.
 # Git is required for fetching the dependencies.
