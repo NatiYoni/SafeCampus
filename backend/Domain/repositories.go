@@ -12,6 +12,15 @@ type UserRepository interface {
 	GetByPhoneNumber(ctx context.Context, phone string) (*User, error)
 	Update(ctx context.Context, user *User) error
 	UpdateLocation(ctx context.Context, userID string, location Location) error
+	UpdateRole(ctx context.Context, userID string, role Role) error
+}
+
+// InvitationRepository defines the interface for invitation persistence.
+type InvitationRepository interface {
+	Create(ctx context.Context, invitation *Invitation) error
+	GetByToken(ctx context.Context, token string) (*Invitation, error)
+	GetByEmail(ctx context.Context, email string) (*Invitation, error)
+	MarkAsUsed(ctx context.Context, id string) error
 }
 
 // AlertRepository defines the interface for alert persistence.

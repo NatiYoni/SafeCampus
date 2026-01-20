@@ -4,6 +4,14 @@ import (
 	"time"
 )
 
+type Role string
+
+const (
+	RoleStudent    Role = "student"
+	RoleAdmin      Role = "admin"
+	RoleSuperAdmin Role = "super_admin"
+)
+
 // User represents a registered user of the Safe Campus app.
 type User struct {
 	ID           string    `json:"id" bson:"_id"`
@@ -12,6 +20,7 @@ type User struct {
 	FullName     string    `json:"full_name" bson:"full_name"`
 	PhoneNumber  string    `json:"phone_number" bson:"phone_number"`
 	UniversityID string    `json:"university_id" bson:"university_id"`
+	Role         Role      `json:"role" bson:"role"` // Role-based access control
 	Profile      Profile   `json:"profile" bson:"profile"`
 	Contacts     []Contact `json:"contacts" bson:"contacts"`
 	DeviceToken  string    `json:"device_token" bson:"device_token"` // For Push Notifications
