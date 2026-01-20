@@ -13,6 +13,7 @@ func SetupRouter(
 	zoneHandler *handlers.ZoneHandler,
 	walkHandler *handlers.WalkHandler,
 	timerHandler *handlers.SafetyTimerHandler,
+	mentalHandler *handlers.MentalHealthHandler,
 ) *gin.Engine {
 	r := gin.Default()
 
@@ -22,6 +23,14 @@ func SetupRouter(
 	r.POST("/resend-verification", userHandler.ResendVerification)
 	r.POST("/login", userHandler.Login)
 	r.POST("/refresh-token", userHandler.RefreshToken)
+
+	// Admin routes
+	admin := r.Group("/admin")
+	{
+		admin.POST("/invite", userHandler.InviteAdmin)
+		admin.POST("/promote", userHandler.PromoteUser)
+		admin.POST("/register", userHandler.RegisterAdmin)
+	}
 
 	// Protected routes (Add middleware later)
 	api := r.Group("/api")
@@ -49,7 +58,11 @@ func SetupRouter(
 		// Safety Timer routes
 		api.POST("/timers", timerHandler.SetTimer)
 		api.POST("/timers/:id/cancel", timerHandler.CancelTimer)
+
+		// Mental Health routes
+		api.GET("/mental-health", mentalHandler.GetResources)
 	}
+
 
 	return r
 }

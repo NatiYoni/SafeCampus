@@ -49,6 +49,72 @@ func (h *UserHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully. Please verify your email."})
 }
 
+// --- Admin Handlers ---
+
+type InviteRequest struct {
+	AdminID string `json:"admin_id" binding:"required"` // Authenticated Admin ID
+	Email   string `json:"email" binding:"required,email"`
+}
+
+func (h *UserHandler) InviteAdmin(c *gin.Context) {
+	var req InviteRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := h.UserUsecase.InviteAdmin(c, req.AdminID, req.Email)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()}) // generic error mapping
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Invitation created", "token": token})
+}
+
+type PromoteRequest struct {
+	AdminID     string `json:"admin_id" binding:"required"` // Authenticated Admin ID
+	TargetEmail string `json:"target_email" binding:"required,email"`
+}
+
+func (h *UserHandler) PromoteUser(c *gin.Context) {
+	var req PromoteRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.UserUsecase.PromoteUser(c, req.AdminID, req.TargetEmail)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User promoted to admin successfully"})
+}
+
+type RegisterAdminRequest struct {
+	Token    string `json:"token" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+	FullName string `json:"full_name" binding:"required"`
+}
+
+func (h *UserHandler) RegisterAdmin(c *gin.Context) {
+	var req RegisterAdminRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.UserUsecase.RegisterAdmin(c, req.Token, req.Email, req.Password, req.FullName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Admin registered successfully"})
+}
+
 func (h *UserHandler) VerifyEmail(c *gin.Context) {
 	var req struct {
 		Email string `json:"email" binding:"required,email"`
