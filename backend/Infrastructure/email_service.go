@@ -14,12 +14,12 @@ type EmailService struct {
 
 func NewEmailService() *EmailService {
 	host := os.Getenv("SMTP_HOST")
-	port := 587 // Default for Gmail/Sendgrid
+	port := 465 // SSL Port for Gmail
 	user := os.Getenv("SMTP_USER")
 	pass := os.Getenv("SMTP_PASS")
 
 	d := gomail.NewDialer(host, port, user, pass)
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: true} // For development; remove in prod if possible
+	d.SSL = true // Use implicit SSL
 
 	return &EmailService{dialer: d}
 }
