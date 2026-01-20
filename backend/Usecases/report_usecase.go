@@ -5,6 +5,7 @@ import (
 	"time"
 
 	domain "github.com/StartUp/safecampus/backend/Domain"
+	"github.com/google/uuid"
 )
 
 // ReportUsecase defines the business logic for incident reporting.
@@ -29,6 +30,7 @@ func (r *reportUsecase) SubmitReport(ctx context.Context, report *domain.Report)
 	ctx, cancel := context.WithTimeout(ctx, r.contextTimeout)
 	defer cancel()
 
+	report.ID = uuid.New().String()
 	report.CreatedAt = time.Now()
 	report.Status = "Pending"
 

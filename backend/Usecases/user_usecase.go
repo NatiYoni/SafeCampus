@@ -23,19 +23,27 @@ type UserUsecase interface {
 	GetProfile(ctx context.Context, id string) (*domain.User, error)
 	UpdateProfile(ctx context.Context, user *domain.User) error
 	AddEmergencyContact(ctx context.Context, userID string, contact domain.Contact) error
+
+	// Admin / RBAC
+	PromoteUser(ctx context.Context, adminID, targetEmail string) error
+	InviteAdmin(ctx context.Context, adminID, email string) (string, error)
+	RegisterAdmin(ctx context.Context, token, email, password, fullName string) error
+	EnsureSuperAdmin(ctx context.Context, email, password string) error
 }
 
 type userUsecase struct {
 	userRepo       domain.UserRepository
+	invitationRepo domain.InvitationRepository
 	emailService   *infrastructure.EmailService
 	jwtService     *infrastructure.JWTService
 	contextTimeout time.Duration
 }
 
 // NewUserUsecase creates a new instance of UserUsecase.
-func NewUserUsecase(userRepo domain.UserRepository, emailService *infrastructure.EmailService, jwtService *infrastructure.JWTService, timeout time.Duration) UserUsecase {
+func NewUserUsecase(userRepo domain.UserRepository, invitationRepo domain.InvitationRepository, emailService *infrastructure.EmailService, jwtService *infrastructure.JWTService, timeout time.Duration) UserUsecase {
 	return &userUsecase{
 		userRepo:       userRepo,
+		invitationRepo: invitationRepo,
 		emailService:   emailService,
 		jwtService:     jwtService,
 		contextTimeout: timeout,
@@ -46,7 +54,10 @@ func (u *userUsecase) Register(ctx context.Context, user *domain.User, password 
 	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()
 
-	// 1. Check if user exists
+	// 1. Force Role to Student for public registration
+	user.Role = domain.RoleStudent
+
+	// 2. Check if user exists
 	existingUser, _ := u.userRepo.GetByEmail(ctx, user.Email)
 	if existingUser != nil {
 		if existingUser.IsVerified {
@@ -208,7 +219,12 @@ func (u *userUsecase) Login(ctx context.Context, email, password string) (string
 
 	// Generate Tokens
 	oid, _ := primitive.ObjectIDFromHex(user.ID)
-	accessToken, refreshToken, err := u.jwtService.GenerateTokens(oid, user.Email, "user")
+	// Use the user's actual role
+	role := string(user.Role)
+	if role == "" {
+		role = "student"
+	}
+	accessToken, refreshToken, err := u.jwtService.GenerateTokens(oid, user.Email, role)
 	if err != nil {
 		return "", "", nil, err
 	}
@@ -275,4 +291,123 @@ func (u *userUsecase) AddEmergencyContact(ctx context.Context, userID string, co
 	}
 	user.Contacts = append(user.Contacts, contact)
 	return u.userRepo.Update(ctx, user)
+}
+
+// --- Admin Logic ---
+
+func (u *userUsecase) PromoteUser(ctx context.Context, adminID, targetEmail string) error {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	// Verify Admin
+	admin, err := u.userRepo.GetByID(ctx, adminID)
+	// Strict: Only SuperAdmin can invite/promote other admins
+	if err != nil || admin.Role != domain.RoleSuperAdmin {
+		return errors.New("unauthorized: only super admin can perform this action")
+	}
+
+	targetUser, err := u.userRepo.GetByEmail(ctx, targetEmail)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	return u.userRepo.UpdateRole(ctx, targetUser.ID, domain.RoleAdmin)
+}
+
+func (u *userUsecase) InviteAdmin(ctx context.Context, adminID, email string) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	// Verify Admin
+	admin, err := u.userRepo.GetByID(ctx, adminID)
+	// Strict: Only SuperAdmin can invite/promote other admins
+	if err != nil || admin.Role != domain.RoleSuperAdmin {
+		return "", errors.New("unauthorized: only super admin can perform this action")
+	}
+
+	// Generate Token
+	token := primitive.NewObjectID().Hex() // Simple token for now
+
+	invitation := &domain.Invitation{
+		ID:        primitive.NewObjectID().Hex(),
+		Email:     email,
+		Token:     token,
+		Role:      domain.RoleAdmin,
+		ExpiresAt: time.Now().Add(48 * time.Hour),
+		CreatedBy: adminID,
+		Used:      false,
+	}
+
+	err = u.invitationRepo.Create(ctx, invitation)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+func (u *userUsecase) RegisterAdmin(ctx context.Context, token, email, password, fullName string) error {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	// Verify Invitation
+	invite, err := u.invitationRepo.GetByToken(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	if invite.Email != email {
+		return errors.New("email does not match invitation")
+	}
+
+	// Create User
+	user := &domain.User{
+		ID:         primitive.NewObjectID().Hex(),
+		Email:      email,
+		FullName:   fullName,
+		Role:       domain.RoleAdmin,
+		IsVerified: true, // Admin invites are trusted
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+	}
+
+	// Hash Password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = string(hashedPassword)
+
+	err = u.userRepo.Create(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	// Mark Invite Used
+	return u.invitationRepo.MarkAsUsed(ctx, invite.ID)
+}
+
+func (u *userUsecase) EnsureSuperAdmin(ctx context.Context, email, password string) error {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	_, err := u.userRepo.GetByEmail(ctx, email)
+	if err == nil {
+		return nil
+	}
+
+	// Create Super Admin
+	user := &domain.User{
+		ID:         primitive.NewObjectID().Hex(),
+		Email:      email,
+		FullName:   "Super Admin",
+		Role:       domain.RoleSuperAdmin,
+		IsVerified: true,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+	}
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	user.PasswordHash = string(hashedPassword)
+
+	return u.userRepo.Create(ctx, user)
 }
