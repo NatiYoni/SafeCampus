@@ -1,7 +1,6 @@
 package infrastructure
 
 import (
-	"crypto/tls"
 	"fmt"
 	"os"
 
