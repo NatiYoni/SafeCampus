@@ -49,7 +49,20 @@ func (u *userUsecase) Register(ctx context.Context, user *domain.User, password 
 	// 1. Check if user exists
 	existingUser, _ := u.userRepo.GetByEmail(ctx, user.Email)
 	if existingUser != nil {
-		return errors.New("email already registered")
+		if existingUser.IsVerified {
+			return errors.New("email already registered")
+		}
+		// If user exists but NOT verified, we overwrite/update the existing entry
+		// so the user can "try again" without getting blocked.
+		user.ID = existingUser.ID // Keep the same ID
+		user.CreatedAt = existingUser.CreatedAt
+		user.UpdatedAt = time.Now()
+		// Determine flow to update below
+	} else {
+		// New User ID if strictly new
+		user.ID = primitive.NewObjectID().Hex()
+		user.CreatedAt = time.Now()
+		user.UpdatedAt = time.Now()
 	}
 
 	// 2. Hash Password
@@ -58,28 +71,37 @@ func (u *userUsecase) Register(ctx context.Context, user *domain.User, password 
 		return err
 	}
 	user.PasswordHash = string(hashedPassword)
-	user.ID = primitive.NewObjectID().Hex()
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = time.Now()
 	user.IsVerified = false
 
 	// 3. Generate Verification Code
 	code := fmt.Sprintf("%06d", rand.Intn(1000000))
-	
+
 	// Hash the code
 	hashCode, _ := bcrypt.GenerateFromPassword([]byte(code), bcrypt.MinCost)
 	user.VerificationCode = string(hashCode)
 	user.VerificationCodeExp = time.Now().Add(15 * time.Minute)
 	user.VerificationAttempts = 0
 
-	// 4. Create User
-	err = u.userRepo.Create(ctx, user)
+	// 4. Create or Update User
+	if existingUser != nil {
+		err = u.userRepo.Update(ctx, user)
+	} else {
+		err = u.userRepo.Create(ctx, user)
+	}
+
 	if err != nil {
 		return err
 	}
 
 	// 5. Send Email
-	go u.emailService.SendVerificationEmail(user.Email, code) // Run in background
+	go func() {
+		err := u.emailService.SendVerificationEmail(user.Email, code)
+		if err != nil {
+			fmt.Printf("Error sending email to %s: %v\n", user.Email, err)
+		} else {
+			fmt.Printf("Verification email sent to %s\n", user.Email)
+		}
+	}() // Run in background
 
 	return nil
 }
