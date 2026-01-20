@@ -15,7 +15,17 @@ type User struct {
 	Profile      Profile   `json:"profile" bson:"profile"`
 	Contacts     []Contact `json:"contacts" bson:"contacts"`
 	DeviceToken  string    `json:"device_token" bson:"device_token"` // For Push Notifications
-	CreatedAt    time.Time `json:"created_at" bson:"created_at"`
+
+	// Authentication Fields (New)
+	IsVerified           bool      `json:"is_verified" bson:"is_verified"`
+	VerificationCode     string    `json:"-" bson:"verification_code"`
+	VerificationCodeExp  time.Time `json:"-" bson:"verification_code_exp"`
+	VerificationAttempts int       `json:"-" bson:"verification_attempts"`
+	LastVerificationSent time.Time `json:"-" bson:"last_verification_sent"`
+	RefreshToken         string    `json:"-" bson:"refresh_token"`
+
+	CreatedAt time.Time `json:"created_at" bson:"created_at"`
+
 	UpdatedAt    time.Time `json:"updated_at" bson:"updated_at"`
 }
 
