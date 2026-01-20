@@ -70,6 +70,13 @@ func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
 	return err
 }
 
+func (r *UserRepository) UpdateRole(ctx context.Context, userID string, role domain.Role) error {
+	filter := bson.M{"_id": userID}
+	update := bson.M{"$set": bson.M{"role": role}}
+	_, err := r.collection.UpdateOne(ctx, filter, update)
+	return err
+}
+
 func (r *UserRepository) UpdateLocation(ctx context.Context, userID string, location domain.Location) error {
 	// Not storing location on user model directly in basic struct, but interface asks for it.
 	// Assuming there might be a LastLocation field or similar, but looking at User struct it is not there?
