@@ -43,10 +43,14 @@ func main() {
 	walkRepo := repositories.NewWalkRepository(db)
 	timerRepo := repositories.NewSafetyTimerRepository(db)
 
-	// 3. Initialize Usecases
-	timeout := time.Second * 2
+	// 2.5 Initialize Infrastructure Services
+	emailService := infrastructure.NewEmailService()
+	jwtService := infrastructure.NewJWTService()
 
-	userUsecase := usecases.NewUserUsecase(userRepo, timeout)
+	// 3. Initialize Usecases
+	timeout := time.Second * 10
+
+	userUsecase := usecases.NewUserUsecase(userRepo, emailService, jwtService, timeout)
 	alertUsecase := usecases.NewAlertUsecase(alertRepo, userRepo, timeout)
 	reportUsecase := usecases.NewReportUsecase(reportRepo, timeout)
 	chatUsecase := usecases.NewChatUsecase(chatRepo, timeout)
