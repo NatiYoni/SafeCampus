@@ -8,7 +8,7 @@ import (
 	"time"
 
 	domain "github.com/StartUp/safecampus/backend/Domain"
-	"github.com/StartUp/safecampus/backend/Infrastructure"
+	infrastructure "github.com/StartUp/safecampus/backend/Infrastructure"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -122,7 +122,7 @@ func (u *userUsecase) VerifyEmail(ctx context.Context, email, code string) error
 	if time.Now().After(user.VerificationCodeExp) {
 		return errors.New("verification code expired")
 	}
-	
+
 	if user.VerificationAttempts >= 5 {
 		return errors.New("too many failed attempts, please request a new code")
 	}
@@ -174,7 +174,15 @@ func (u *userUsecase) ResendVerification(ctx context.Context, email string) erro
 		return err
 	}
 
-	go u.emailService.SendVerificationEmail(user.Email, code)
+	go func() {
+		err := u.emailService.SendVerificationEmail(user.Email, code)
+		if err != nil {
+			fmt.Printf("Error sending resend-verification email to %s: %v\n", user.Email, err)
+		} else {
+			fmt.Printf("Resend-verification email successfully sent to %s\n", user.Email)
+		}
+	}()
+
 	return nil
 }
 
@@ -199,7 +207,7 @@ func (u *userUsecase) Login(ctx context.Context, email, password string) (string
 	}
 
 	// Generate Tokens
-	oid, _ := primitive.ObjectIDFromHex(user.ID) 
+	oid, _ := primitive.ObjectIDFromHex(user.ID)
 	accessToken, refreshToken, err := u.jwtService.GenerateTokens(oid, user.Email, "user")
 	if err != nil {
 		return "", "", nil, err
@@ -238,12 +246,12 @@ func (u *userUsecase) RefreshToken(ctx context.Context, refreshToken string) (st
 	oid, _ := primitive.ObjectIDFromHex(user.ID)
 	// We only return access token here for simplicity or we can update refresh too.
 	// But interface says (string, error).
-	newAccessToken, _, err := u.jwtService.GenerateTokens(oid, user.Email, "user") 
+	newAccessToken, _, err := u.jwtService.GenerateTokens(oid, user.Email, "user")
 	// Ideally we should rotate refresh token too, but keeping it simple as interface returns 1 string.
 	// We'll reuse the existing refresh token flow on client side until it expires (7 days).
 	// If we wanted rotation, we'd need to update the interface to return (string, string, error).
-	
-	return newAccessToken, nil 
+
+	return newAccessToken, nil
 }
 
 func (u *userUsecase) GetProfile(ctx context.Context, id string) (*domain.User, error) {
