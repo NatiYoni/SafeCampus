@@ -1,6 +1,7 @@
 package infrastructure
 
 import (
+	"crypto/tls"
 	"fmt"
 	"os"
 
@@ -12,13 +13,14 @@ type EmailService struct {
 }
 
 func NewEmailService() *EmailService {
+	// 1. Try Port 587 (TLS) - Recommended for Render
 	host := os.Getenv("SMTP_HOST")
-	port := 465 // SSL Port for Gmail
+	port := 587
 	user := os.Getenv("SMTP_USER")
 	pass := os.Getenv("SMTP_PASS")
 
 	d := gomail.NewDialer(host, port, user, pass)
-	d.SSL = true // Use implicit SSL
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true} // Allow implicit TLS
 
 	return &EmailService{dialer: d}
 }
