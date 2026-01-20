@@ -18,7 +18,10 @@ func SetupRouter(
 
 	// Public routes
 	r.POST("/register", userHandler.Register)
+	r.POST("/verify-email", userHandler.VerifyEmail)
+	r.POST("/resend-verification", userHandler.ResendVerification)
 	r.POST("/login", userHandler.Login)
+	r.POST("/refresh-token", userHandler.RefreshToken)
 
 	// Protected routes (Add middleware later)
 	api := r.Group("/api")
