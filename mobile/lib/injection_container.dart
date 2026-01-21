@@ -48,6 +48,7 @@ import 'features/reporting/domain/usecases/submit_report.dart';
 import 'features/reporting/domain/usecases/get_reports.dart';
 import 'features/reporting/presentation/bloc/reporting_bloc.dart';
 
+import 'features/admin/presentation/bloc/admin_sos_bloc.dart';
 import 'features/safety_timer/data/datasources/safety_timer_remote_data_source.dart';
 import 'features/safety_timer/data/repositories/safety_timer_repository_impl.dart';
 import 'features/safety_timer/domain/repositories/safety_timer_repository.dart';
@@ -99,11 +100,16 @@ Future<void> init() async {
   // Data sources
   sl.registerLazySingleton<ChatRemoteDataSource>(() => ChatRemoteDataSourceImpl(client: sl()));
 
+import 'features/emergency/domain/usecases/cancel_sos.dart';
+
+// ... existing imports ...
+
   //! Features - Emergency (SOS)
   // Bloc
-  sl.registerFactory(() => EmergencyBloc(triggerSos: sl()));
+  sl.registerFactory(() => EmergencyBloc(triggerSos: sl(), cancelSos: sl()));
   // Use cases
   sl.registerLazySingleton(() => TriggerSos(sl()));
+  sl.registerLazySingleton(() => CancelSos(sl())); // Added CancelSos
   sl.registerLazySingleton(() => GetAlerts(sl()));
   // Repository
   sl.registerLazySingleton<EmergencyRepository>(() => EmergencyRepositoryImpl(remoteDataSource: sl()));
