@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
 
-	domain "github.com/StartUp/safecampus/backend/Domain"
 	"github.com/StartUp/safecampus/backend/Delivery/handlers"
 	"github.com/StartUp/safecampus/backend/Delivery/routers"
+	domain "github.com/StartUp/safecampus/backend/Domain"
 	infrastructure "github.com/StartUp/safecampus/backend/Infrastructure"
 	repositories "github.com/StartUp/safecampus/backend/Repositories"
 	usecases "github.com/StartUp/safecampus/backend/Usecases"
@@ -25,18 +24,18 @@ func seedAdminUser(db *mongo.Database) {
 	password := "admin123"
 
 	collection := db.Collection("users")
-	
+
 	// Check if admin exists
 	var existing domain.User
 	err := collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&existing)
 	if err == nil {
 		log.Println("✅ Admin account already exists.")
-		return 
+		return
 	}
 
 	// Create Admin
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	
+
 	admin := domain.User{
 		ID:           uuid.New().String(),
 		Email:        email,
@@ -101,25 +100,6 @@ func main() {
 	timeout := time.Second * 10
 
 	userUsecase := usecases.NewUserUsecase(userRepo, invitationRepo, emailService, jwtService, timeout)
-
-	// Seed Super Admin
-	seedCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	// Use environment variables or hardcoded fallback
-	adminEmail := os.Getenv("ADMIN_EMAIL")
-	if adminEmail == "" {
-		adminEmail = "admin@safecampus.edu"
-	}
-	adminPass := os.Getenv("ADMIN_PASS")
-	if adminPass == "" {
-		adminPass = "AdminSecret123!"
-	}
-
-	if err := userUsecase.EnsureSuperAdmin(seedCtx, adminEmail, adminPass); err != nil {
-		log.Printf("Warning: Failed to ensure super admin: %v", err)
-	} else {
-		log.Println("Super Admin check completed.")
-	}
 
 	alertUsecase := usecases.NewAlertUsecase(alertRepo, userRepo, timeout)
 	reportUsecase := usecases.NewReportUsecase(reportRepo, timeout)
