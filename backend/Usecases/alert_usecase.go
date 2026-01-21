@@ -35,14 +35,15 @@ func (a *alertUsecase) TriggerSOS(ctx context.Context, userID string, location d
 	defer cancel()
 
 	user, err := a.userRepo.GetByID(ctx, userID)
-	if err != nil {
-		return nil, err
+	userName := "Unknown"
+	if err == nil {
+		userName = user.FullName
 	}
 
 	alert := &domain.Alert{
 		ID:        uuid.New().String(),
 		UserID:    userID,
-		UserName:  user.FullName,
+		UserName:  userName,
 		Type:      domain.AlertSOS,
 		Status:    "Active",
 		Location:  location,
