@@ -5,6 +5,7 @@ import '../../domain/entities/alert.dart';
 
 abstract class EmergencyRemoteDataSource {
   Future<Alert> triggerSos(String userId);
+  Future<void> cancelSos(String alertId);
   Future<List<Alert>> getAlerts();
 }
 
@@ -22,6 +23,7 @@ class EmergencyRemoteDataSourceImpl implements EmergencyRemoteDataSource {
       return data.map((json) => Alert(
         id: json['id'],
         userId: json['user_id'],
+        userName: json['user_name'], // Map user_name
         type: AlertType.sos, // Defaulting to SOS for now as it's the main one
         status: json['status'],
         timestamp: DateTime.parse(json['timestamp']),
@@ -56,6 +58,7 @@ class EmergencyRemoteDataSourceImpl implements EmergencyRemoteDataSource {
       return Alert(
         id: data['id'] ?? 'temp-id',
         userId: data['user_id'],
+        userName: data['user_name'],
         type: AlertType.sos,
         status: data['status'],
         timestamp: DateTime.parse(data['timestamp']),
@@ -64,6 +67,14 @@ class EmergencyRemoteDataSourceImpl implements EmergencyRemoteDataSource {
       );
     } else {
       throw Exception('Failed to trigger SOS');
+    }
+  }
+
+  @override
+  Future<void> cancelSos(String alertId) async {
+    final response = await client.delete('/api/alerts/$alertId');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to cancel SOS');
     }
   }
 
