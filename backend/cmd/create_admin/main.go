@@ -13,7 +13,6 @@ import (
 	infrastructure "github.com/StartUp/safecampus/backend/Infrastructure"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 

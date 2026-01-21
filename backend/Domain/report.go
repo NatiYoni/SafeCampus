@@ -26,4 +26,5 @@ type Report struct {
 	Location    *Location      `json:"location,omitempty" bson:"location,omitempty"`
 	Status      string         `json:"status" bson:"status"` // "Pending", "Reviewed", "Resolved"
 	CreatedAt   time.Time      `json:"created_at" bson:"created_at"`
+	Timestamp   time.Time      `json:"timestamp" bson:"timestamp"` // Added for frontend compatibility
 }
