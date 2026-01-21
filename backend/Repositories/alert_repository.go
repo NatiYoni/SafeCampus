@@ -99,7 +99,7 @@ func (r *AlertRepository) FetchNearby(ctx context.Context, loc domain.Location, 
 
 func (r *AlertRepository) GetAll(ctx context.Context) ([]*domain.Alert, error) {
 	var alerts []*domain.Alert
-	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
+	opts := options.Find().SetSort(bson.D{{Key: "timestamp", Value: -1}})
 	cursor, err := r.collection.Find(ctx, bson.M{}, opts)
 	if err != nil {
 		return nil, err
