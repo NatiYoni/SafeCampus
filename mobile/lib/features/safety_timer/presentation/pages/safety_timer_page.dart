@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart'; // Import go_router for navigation
 import '../bloc/safety_timer_bloc.dart';
 import '../bloc/safety_timer_event.dart';
 import '../bloc/safety_timer_state.dart';
+import '../../../emergency/presentation/bloc/emergency_bloc.dart';
+import '../../../emergency/presentation/bloc/emergency_event.dart';
 
 class SafetyTimerPage extends StatefulWidget {
   const SafetyTimerPage({super.key});
@@ -23,6 +25,14 @@ class _SafetyTimerPageState extends State<SafetyTimerPage> {
         listener: (context, state) {
           if (state is SafetyTimerError) {
              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is SafetyTimerSosTriggered) {
+             // Sync state with EmergencyBloc and navigate to dashboard
+             context.read<EmergencyBloc>().add(SosStateChanged(state.alert));
+             if (context.canPop()) {
+               context.pop();
+             } else {
+               context.go('/dashboard'); // Or whatever route implies dashboard
+             }
           }
         },
         builder: (context, state) {
@@ -47,7 +57,7 @@ class _SafetyTimerPageState extends State<SafetyTimerPage> {
           const SizedBox(height: 16),
           DropdownButtonFormField<int>(
             value: _selectedDuration,
-            items: [5, 10, 15, 30, 60].map((e) => DropdownMenuItem(value: e, child: Text("$e minutes"))).toList(),
+            items: [1, 2, 5, 10, 15, 30, 60].map((e) => DropdownMenuItem(value: e, child: Text("$e minutes"))).toList(),
             onChanged: (val) {
               if (val != null) setState(() => _selectedDuration = val);
             },

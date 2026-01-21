@@ -51,7 +51,11 @@ class SafetyTimerBloc extends Bloc<SafetyTimerEvent, SafetyTimerState> {
     on<TimerExpiredEvent>((event, emit) async {
       if (state is SafetyTimerRunning) {
         final userId = (state as SafetyTimerRunning).timer.userId;
-        await triggerSos(userId);
+        final result = await triggerSos(userId);
+        result.fold(
+          (failure) => emit(SafetyTimerError(failure.message)),
+          (alert) => emit(SafetyTimerSosTriggered(alert)),
+        );
       }
     });
   }

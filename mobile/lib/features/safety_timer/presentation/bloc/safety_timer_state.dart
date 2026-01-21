@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/safety_timer.dart';
+import '../../../emergency/domain/entities/alert.dart';
 
 abstract class SafetyTimerState extends Equatable {
   const SafetyTimerState();
@@ -20,4 +21,11 @@ class SafetyTimerError extends SafetyTimerState {
   const SafetyTimerError(this.message);
   @override
   List<Object> get props => [message];
+}
+
+class SafetyTimerSosTriggered extends SafetyTimerState {
+  final Alert alert;
+  const SafetyTimerSosTriggered(this.alert);
+  @override
+  List<Object> get props => [alert];
 }
