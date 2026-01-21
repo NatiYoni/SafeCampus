@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'dart:convert';
 import '../models/user_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -8,6 +9,7 @@ abstract class AuthRemoteDataSource {
   Future<void> verifyEmail(String email, String code);
   Future<void> resendVerification(String email);
   Future<void> logout();
+  Future<UserModel?> getLastUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -30,7 +32,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final data = response.data;
       await secureStorage.write(key: 'access_token', value: data['access_token']);
       await secureStorage.write(key: 'refresh_token', value: data['refresh_token']);
-      return UserModel.fromJson(data['user']);
+      final user = UserModel.fromJson(data['user']);
+      await secureStorage.write(key: 'user', value: jsonEncode(user.toJson()));
+      return user;
     } else {
       throw Exception('Failed to login');
     }
@@ -85,7 +89,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> logout() async {
-    await secureStorage.delete(key: 'access_token');
-    await secureStorage.delete(key: 'refresh_token');
+    // Clear all storage on logout
+    await secureStorage.deleteAll();
+  }
+
+  @override
+  Future<UserModel?> getLastUser() async {
+    final userJson = await secureStorage.read(key: 'user');
+    final accessToken = await secureStorage.read(key: 'access_token');
+    
+    if (userJson != null && accessToken != null) {
+      try {
+        return UserModel.fromJson(jsonDecode(userJson));
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   }
 }

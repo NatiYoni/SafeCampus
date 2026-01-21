@@ -15,3 +15,7 @@ class ServerFailure extends Failure {
 class DeviceFailure extends Failure {
   const DeviceFailure(super.message);
 }
+
+class CacheFailure extends Failure {
+  const CacheFailure(super.message);
+}

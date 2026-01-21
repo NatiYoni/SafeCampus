@@ -60,8 +60,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, User>> getCurrentUser() {
-    // TODO: implement getCurrentUser logic (e.g. from local storage or cached)
-    throw UnimplementedError();
+  Future<Either<Failure, User>> getCurrentUser() async {
+    try {
+      final user = await remoteDataSource.getLastUser();
+      if (user != null) {
+        return Right(user);
+      }
+      return Left(CacheFailure('No user found'));
+    } catch (e) {
+      return Left(CacheFailure(e.toString()));
+    }
   }
 }
