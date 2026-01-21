@@ -112,7 +112,7 @@ func main() {
 	userUsecase := usecases.NewUserUsecase(userRepo, invitationRepo, emailService, jwtService, timeout)
 
 	alertUsecase := usecases.NewAlertUsecase(alertRepo, userRepo, timeout)
-	reportUsecase := usecases.NewReportUsecase(reportRepo, timeout)
+	reportUsecase := usecases.NewReportUsecase(reportRepo, userRepo, timeout)
 	chatUsecase := usecases.NewChatUsecase(chatRepo, timeout)
 	zoneUsecase := usecases.NewZoneUsecase(zoneRepo, timeout)
 	walkUsecase := usecases.NewWalkUseCase(walkRepo)

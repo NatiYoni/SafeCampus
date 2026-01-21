@@ -23,6 +23,7 @@ type Report struct {
 	Description string         `json:"description" bson:"description"`
 	Attachments []string       `json:"attachments" bson:"attachments"` // URLs to photos/videos
 	IsAnonymous bool           `json:"is_anonymous" bson:"is_anonymous"`
+	UserName    string         `json:"user_name,omitempty" bson:"user_name,omitempty"` // Added for non-anonymous reporting
 	Location    *Location      `json:"location,omitempty" bson:"location,omitempty"`
 	Status      string         `json:"status" bson:"status"` // "Pending", "Reviewed", "Resolved"
 	CreatedAt   time.Time      `json:"created_at" bson:"created_at"`

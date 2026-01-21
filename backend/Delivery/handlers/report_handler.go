@@ -25,6 +25,18 @@ func (h *ReportHandler) SubmitReport(c *gin.Context) {
 		return
 	}
 
+	// Override UserID from context (Token) to ensure authenticity
+	// unless completely anonymous where we might want to respect that?
+	// But binding usually captures JSON. Let's ensure we use the authenticated user's ID
+	// if the token is present, even if they mark it anonymous (for internal tracking if law requires)
+	// OR if we purely trust "is_anonymous" to scrub it.
+	// Current requirement: "If user is not anonymous he sends the data... if anonymous print message [no name]"
+	
+	userID := c.GetString("user_id")
+	if userID != "" {
+		report.UserID = userID
+	}
+
 	if err := h.ReportUsecase.SubmitReport(c, &report); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

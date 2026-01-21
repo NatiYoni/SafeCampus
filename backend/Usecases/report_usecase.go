@@ -16,12 +16,14 @@ type ReportUsecase interface {
 
 type reportUsecase struct {
 	reportRepo     domain.ReportRepository
+	userRepo       domain.UserRepository // Added to fetch user name
 	contextTimeout time.Duration
 }
 
-func NewReportUsecase(reportRepo domain.ReportRepository, timeout time.Duration) ReportUsecase {
+func NewReportUsecase(reportRepo domain.ReportRepository, userRepo domain.UserRepository, timeout time.Duration) ReportUsecase {
 	return &reportUsecase{
 		reportRepo:     reportRepo,
+		userRepo:       userRepo,
 		contextTimeout: timeout,
 	}
 }
@@ -29,6 +31,13 @@ func NewReportUsecase(reportRepo domain.ReportRepository, timeout time.Duration)
 func (r *reportUsecase) SubmitReport(ctx context.Context, report *domain.Report) error {
 	ctx, cancel := context.WithTimeout(ctx, r.contextTimeout)
 	defer cancel()
+
+	if !report.IsAnonymous && report.UserID != "" {
+		user, err := r.userRepo.GetByID(ctx, report.UserID)
+		if err == nil && user != nil {
+			report.UserName = user.FullName
+		}
+	}
 
 	report.ID = uuid.New().String()
 	report.CreatedAt = time.Now()

@@ -7,6 +7,7 @@ import (
 	domain "github.com/StartUp/safecampus/backend/Domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ReportRepository struct {
@@ -46,7 +47,9 @@ func (r *ReportRepository) FetchAll(ctx context.Context, filterMap map[string]in
 		query[k] = v
 	}
 
-	cursor, err := r.collection.Find(ctx, query)
+	opts := options.Find().SetSort(bson.D{{Key: "timestamp", Value: -1}})
+
+	cursor, err := r.collection.Find(ctx, query, opts)
 	if err != nil {
 		return nil, err
 	}
