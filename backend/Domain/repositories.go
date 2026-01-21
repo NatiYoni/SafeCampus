@@ -30,6 +30,7 @@ type AlertRepository interface {
 	GetByUserID(ctx context.Context, userID string) (*Alert, error) // Added single user alert fetch
 	Update(ctx context.Context, alert *Alert) error                 // Added update
 	GetActiveByUserID(ctx context.Context, userID string) ([]*Alert, error)
+	DeleteByUserID(ctx context.Context, userID string) error
 	GetAll(ctx context.Context) ([]*Alert, error)
 	UpdateStatus(ctx context.Context, id string, status string) error
 	FetchNearby(ctx context.Context, loc Location, radius float64) ([]*Alert, error)
