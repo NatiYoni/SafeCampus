@@ -22,4 +22,5 @@ type WalkRepository interface {
 	UpdateLocation(ctx context.Context, id string, location Location) error
 	EndWalk(ctx context.Context, id string) error
 	GetActiveWalksByGuardian(ctx context.Context, guardianID string) ([]*WalkSession, error)
+	GetAllActiveWalks(ctx context.Context) ([]*WalkSession, error)
 }
