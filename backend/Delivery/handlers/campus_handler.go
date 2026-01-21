@@ -30,8 +30,8 @@ func (h *CampusHandler) Heartbeat(c *gin.Context) {
 		return
 	}
 
-	// Assuming AuthMiddleware sets "userID"
-	userID := c.GetString("userID")
+	// Assuming AuthMiddleware sets "user_id"
+	userID := c.GetString("user_id")
 	if userID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
