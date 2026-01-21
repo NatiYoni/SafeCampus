@@ -109,3 +109,18 @@ func (r *AlertRepository) GetAll(ctx context.Context) ([]*domain.Alert, error) {
 	}
 	return alerts, nil
 }
+
+func (r *AlertRepository) Delete(ctx context.Context, id string) error {
+	_, err := r.collection.DeleteOne(ctx, bson.M{"_id": id})
+	return err
+}
+
+func (r *AlertRepository) EnsureTTLIndex(ctx context.Context) error {
+	// Create TTL index to expire documents 3 days (259200 seconds) after 'timestamp'
+	model := mongo.IndexModel{
+		Keys: bson.M{"timestamp": 1},
+		Options: options.Index().SetExpireAfterSeconds(259200),
+	}
+	_, err := r.collection.Indexes().CreateOne(ctx, model)
+	return err
+}
