@@ -12,6 +12,7 @@ import 'features/auth/domain/usecases/logout.dart';
 import 'features/auth/domain/usecases/register.dart';
 import 'features/auth/domain/usecases/resend_verification.dart';
 import 'features/auth/domain/usecases/verify_email.dart';
+import 'features/auth/domain/usecases/check_auth_status.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
 import 'features/chat/data/datasources/chat_remote_data_source.dart';
@@ -64,13 +65,15 @@ final sl = GetIt.instance;
 Future<void> init() async {
   //! Features - Auth
   // Bloc
-  sl.registerFactory(
+  sl.registerLazySingleton(
     () => AuthBloc(
       login: sl(),
       register: sl(),
       verifyEmail: sl(),
       resendVerification: sl(),
       logout: sl(),
+      checkAuthStatus: sl(),
+      sessionExpiredStream: sl<AuthInterceptor>().onSessionExpired,
     ),
   );
 
@@ -80,6 +83,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => VerifyEmail(sl()));
   sl.registerLazySingleton(() => ResendVerification(sl()));
   sl.registerLazySingleton(() => Logout(sl()));
+  sl.registerLazySingleton(() => CheckAuthStatus(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(
@@ -166,22 +170,24 @@ Future<void> init() async {
   sl.registerLazySingleton<MentalHealthRemoteDataSource>(() => MentalHealthRemoteDataSourceImpl(client: sl()));
 
   //! Core
-  // Network Client
-  sl.registerLazySingleton(() {
-    final dio = Dio(BaseOptions(
-      baseUrl: apiBaseUrl,
-      connectTimeout: const Duration(seconds: 60),
-      receiveTimeout: const Duration(seconds: 60),
-      headers: {'Content-Type': 'application/json'},
-    ));
-    
-    // Add interceptor for auth token injection
-    dio.interceptors.add(AuthInterceptor(dio, sl()));
-    // dio.interceptors.add(LogInterceptor(responseBody: true));
-    
-    return dio;
-  });
-
   // Secure Storage
-  sl.registerLazySingleton(() => const FlutterSecureStorage());
+  final secureStorage = const FlutterSecureStorage();
+  sl.registerLazySingleton(() => secureStorage);
+
+  // Network Client
+  final dio = Dio(BaseOptions(
+    baseUrl: apiBaseUrl,
+    connectTimeout: const Duration(seconds: 60),
+    receiveTimeout: const Duration(seconds: 60),
+    headers: {'Content-Type': 'application/json'},
+  ));
+  sl.registerLazySingleton(() => dio);
+
+  // Interceptor
+  // We pass 'dio' instance but handle circularity because 'dio' is already created.
+  final authInterceptor = AuthInterceptor(dio, secureStorage);
+  sl.registerLazySingleton(() => authInterceptor);
+  
+  // Add interceptor to dio
+  dio.interceptors.add(authInterceptor);
 }

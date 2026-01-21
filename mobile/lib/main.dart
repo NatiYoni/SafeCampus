@@ -24,6 +24,7 @@ import 'features/admin/presentation/pages/admin_reports_page.dart';
 import 'features/admin/presentation/pages/admin_walks_page.dart';
 import 'features/admin/presentation/pages/admin_staff_page.dart';
 import 'injection_container.dart' as di;
+import 'core/go_router_refresh_stream.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => di.sl<AuthBloc>()),
+        BlocProvider(create: (_) => di.sl<AuthBloc>()..add(CheckAuthStatusEvent())),
         BlocProvider(create: (_) => di.sl<EmergencyBloc>()),
         BlocProvider(create: (_) => di.sl<FriendWalkBloc>()),
         BlocProvider(create: (_) => di.sl<ReportingBloc>()),
@@ -110,6 +111,31 @@ class HomeScreen extends StatelessWidget {
 
 final GoRouter _router = GoRouter(
   initialLocation: '/',
+  redirect: (context, state) {
+    final authState = context.read<AuthBloc>().state;
+    final isLoggingIn = state.uri.toString() == '/login';
+    final isRegistering = state.uri.toString() == '/register';
+    final isVerifying = state.uri.toString() == '/verify_email';
+    final isWelcome = state.uri.toString() == '/';
+    
+    // Allow public access to welcome, login, register, verify
+    if(isWelcome || isLoggingIn || isRegistering || isVerifying) {
+       // but if authenticated, go to dashboard
+       if (authState is AuthAuthenticated) {
+          return '/dashboard';
+       }
+       return null;
+    }
+
+    // Checking authentication for protected routes
+    if (authState is! AuthAuthenticated) {
+        // If not authenticated, always go to welcome (or login)
+        return '/';
+    }
+
+    return null;
+  },
+  refreshListenable: GoRouterRefreshStream(di.sl<AuthBloc>().stream),
   routes: [
     GoRoute(
       path: '/dashboard',

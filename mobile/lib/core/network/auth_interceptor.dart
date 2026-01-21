@@ -1,9 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:async';
 
 class AuthInterceptor extends Interceptor {
-  final Dio _dio; // Use this for retries
+  final Dio _dio;
   final FlutterSecureStorage _storage;
+  final StreamController<void> _sessionExpiredController = StreamController.broadcast();
+
+  Stream<void> get onSessionExpired => _sessionExpiredController.stream;
 
   AuthInterceptor(this._dio, this._storage);
 
@@ -67,6 +71,6 @@ class AuthInterceptor extends Interceptor {
 
   Future<void> _logout() async {
     await _storage.deleteAll();
-    // Assuming the UI listens to storage changes or stateless auth check on route
+    _sessionExpiredController.add(null);
   }
 }
