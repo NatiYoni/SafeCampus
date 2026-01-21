@@ -1,7 +1,5 @@
 package domain
 
-import "context"
-
 type ResourceType string
 
 const (
@@ -20,7 +18,4 @@ type MentalHealthResource struct {
 	Thumbnail   string       `json:"thumbnail,omitempty" bson:"thumbnail,omitempty"`
 }
 
-type MentalHealthRepository interface {
-	GetAllResources(ctx context.Context) ([]*MentalHealthResource, error)
-	// Add Create/Update later if needed for admin panel
-}
+// MentalHealthRepository is defined in repositories.go
