@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
 import 'core/constants/constants.dart';
+import 'core/network/auth_interceptor.dart';
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
@@ -174,7 +175,8 @@ Future<void> init() async {
       headers: {'Content-Type': 'application/json'},
     ));
     
-    // Add interceptor for auth token injection if needed later
+    // Add interceptor for auth token injection
+    dio.interceptors.add(AuthInterceptor(dio, sl()));
     // dio.interceptors.add(LogInterceptor(responseBody: true));
     
     return dio;
