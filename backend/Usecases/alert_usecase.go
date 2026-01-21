@@ -34,9 +34,15 @@ func (a *alertUsecase) TriggerSOS(ctx context.Context, userID string, location d
 	ctx, cancel := context.WithTimeout(ctx, a.contextTimeout)
 	defer cancel()
 
+	user, err := a.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
 	alert := &domain.Alert{
 		ID:        uuid.New().String(),
 		UserID:    userID,
+		UserName:  user.FullName,
 		Type:      domain.AlertSOS,
 		Status:    "Active",
 		Location:  location,
@@ -52,7 +58,7 @@ func (a *alertUsecase) TriggerSOS(ctx context.Context, userID string, location d
 		// SendWSNotification(userID, "SOS")
 	}()
 
-	err := a.alertRepo.Create(ctx, alert)
+	err = a.alertRepo.Create(ctx, alert)
 	return alert, err
 }
 
@@ -60,7 +66,7 @@ func (a *alertUsecase) UpdateLocation(ctx context.Context, alertID string, locat
 	// Logic to update live tracking
 	return nil
 }
-
+ 
 func (a *alertUsecase) ResolveAlert(ctx context.Context, alertID string) error {
 	ctx, cancel := context.WithTimeout(ctx, a.contextTimeout)
 	defer cancel()
