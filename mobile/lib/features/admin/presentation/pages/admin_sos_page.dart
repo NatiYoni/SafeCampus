@@ -36,8 +36,8 @@ class AdminSosPage extends StatelessWidget {
                        subtitle: Column(
                          crossAxisAlignment: CrossAxisAlignment.start,
                          children: [
-                           Text("User: ${alert.userName ?? 'Unknown'}"),
-                           Text("Uni ID: ${alert.universityId ?? 'Unknown'} (ID: ${alert.userId})"),
+                           Text("Student Name: ${alert.userName ?? 'Unknown'}"),
+                           Text("Student ID: ${alert.universityId ?? 'Unknown'}"),
                            Text("Location: ${alert.latitude.toStringAsFixed(4)}, ${alert.longitude.toStringAsFixed(4)}"),
                            Text("Time: ${DateFormat.yMMMd().add_jm().format(alert.timestamp.toLocal())}"),
                          ],
