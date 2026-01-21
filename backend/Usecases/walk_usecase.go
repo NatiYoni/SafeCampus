@@ -46,3 +46,7 @@ func (uc *WalkUseCase) UpdateLocation(ctx context.Context, walkID string, lat fl
 func (uc *WalkUseCase) EndWalk(ctx context.Context, walkID string) error {
 	return uc.WalkRepo.EndWalk(ctx, walkID)
 }
+
+func (uc *WalkUseCase) GetAllActiveWalks(ctx context.Context) ([]*domain.WalkSession, error) {
+	return uc.WalkRepo.GetAllActiveWalks(ctx)
+}
