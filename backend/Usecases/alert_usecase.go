@@ -42,24 +42,11 @@ func (a *alertUsecase) TriggerSOS(ctx context.Context, userID string, location d
 		universityID = user.UniversityID
 	}
 
-	// 1. Check if user already has an alert (active or inactive)
-	existingAlert, err := a.alertRepo.GetByUserID(ctx, userID)
-	if err == nil && existingAlert != nil {
-		// Update existing alert
-		existingAlert.Status = "Active"
-		existingAlert.Location = location
-		existingAlert.Timestamp = time.Now().UTC() // Store as UTC
-		existingAlert.UserName = userName
-		existingAlert.UniversityID = universityID
-		existingAlert.Type = domain.AlertSOS // Refresh type if needed
+	// 1. Remove ANY existing alerts for this user to ensure only one active or inactive record exists
+	// This satisfies the requirement: "existing alerts we should remove them and the user should only generate one sos"
+	_ = a.alertRepo.DeleteByUserID(ctx, userID)
 
-		if err := a.alertRepo.Update(ctx, existingAlert); err != nil {
-			return nil, err
-		}
-		return existingAlert, nil
-	}
-
-	// 2. Create new if none exists
+	// 2. Create new alert
 	alert := &domain.Alert{
 		ID:           uuid.New().String(),
 		UserID:       userID,
