@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user.dart';
@@ -6,6 +7,7 @@ import '../../domain/usecases/logout.dart';
 import '../../domain/usecases/register.dart';
 import '../../domain/usecases/resend_verification.dart';
 import '../../domain/usecases/verify_email.dart';
+import '../../domain/usecases/check_auth_status.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -16,6 +18,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyEmail verifyEmail;
   final ResendVerification resendVerification;
   final Logout logout;
+  final CheckAuthStatus checkAuthStatus;
+  
+  StreamSubscription? _sessionExpiredSubscription;
 
   AuthBloc({
     required this.login,
@@ -23,12 +28,37 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.verifyEmail,
     required this.resendVerification,
     required this.logout,
+    required this.checkAuthStatus,
+    Stream<void>? sessionExpiredStream, // Optional dependency
   }) : super(AuthInitial()) {
     on<LoginEvent>(_onLogin);
     on<RegisterEvent>(_onRegister);
     on<VerifyEmailEvent>(_onVerifyEmail);
     on<ResendVerificationEvent>(_onResendVerification);
     on<LogoutEvent>(_onLogout);
+    on<CheckAuthStatusEvent>(_onCheckAuthStatus);
+
+    if (sessionExpiredStream != null) {
+      _sessionExpiredSubscription = sessionExpiredStream.listen((_) {
+        add(LogoutEvent());
+      });
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _sessionExpiredSubscription?.cancel();
+    return super.close();
+  }
+
+  Future<void> _onCheckAuthStatus(CheckAuthStatusEvent event, Emitter<AuthState> emit) async {
+    // Don't emit loading here to avoid screen flicker if possible, or do if needed.
+    // emit(AuthLoading()); 
+    final result = await checkAuthStatus();
+    result.fold(
+      (failure) => emit(AuthUnauthenticated()),
+      (user) => emit(AuthAuthenticated(user)),
+    );
   }
 
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
