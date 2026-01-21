@@ -60,6 +60,7 @@ func SetupRouter(
 		api.POST("/walks/start", walkHandler.StartWalk)
 		api.POST("/walks/:id/location", walkHandler.UpdateLocation)
 		api.POST("/walks/:id/end", walkHandler.EndWalk)
+		api.GET("/walks/active", walkHandler.GetAllActiveWalks)
 
 		// Safety Timer routes
 		api.POST("/timers", timerHandler.SetTimer)
