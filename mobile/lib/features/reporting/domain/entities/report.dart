@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 class Report extends Equatable {
   final String id;
   final String userId;
+  final String? userName; // Added userName
   final String category;
   final String description;
   final bool isAnonymous;
@@ -12,6 +13,7 @@ class Report extends Equatable {
   const Report({
     required this.id,
     required this.userId,
+    this.userName,
     required this.category,
     required this.description,
     required this.isAnonymous,
