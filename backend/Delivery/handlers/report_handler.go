@@ -30,7 +30,7 @@ func (h *ReportHandler) SubmitReport(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Report submitted successfully"})
+	c.JSON(http.StatusCreated, report)
 }
 
 func (h *ReportHandler) GetReports(c *gin.Context) {

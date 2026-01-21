@@ -32,7 +32,9 @@ func (r *reportUsecase) SubmitReport(ctx context.Context, report *domain.Report)
 
 	report.ID = uuid.New().String()
 	report.CreatedAt = time.Now()
+	report.Timestamp = time.Now() // Ensure Timestamp is also set for frontend compatibility
 	report.Status = "Pending"
+
 
 	return r.reportRepo.Create(ctx, report)
 }
