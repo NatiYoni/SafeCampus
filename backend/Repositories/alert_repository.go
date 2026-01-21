@@ -38,6 +38,26 @@ func (r *AlertRepository) GetByID(ctx context.Context, id string) (*domain.Alert
 	return &alert, nil
 }
 
+func (r *AlertRepository) GetByUserID(ctx context.Context, userID string) (*domain.Alert, error) {
+	var alert domain.Alert
+	filter := bson.M{"user_id": userID}
+	err := r.collection.FindOne(ctx, filter).Decode(&alert)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil // Return nil if not found, not error
+		}
+		return nil, err
+	}
+	return &alert, nil
+}
+
+func (r *AlertRepository) Update(ctx context.Context, alert *domain.Alert) error {
+	filter := bson.M{"_id": alert.ID}
+	update := bson.M{"$set": alert}
+	_, err := r.collection.UpdateOne(ctx, filter, update)
+	return err
+}
+
 func (r *AlertRepository) GetActiveByUserID(ctx context.Context, userID string) ([]*domain.Alert, error) {
 	var alerts []*domain.Alert
 	// Assuming "Resolved" is the end state. Active could correspond to anything else.
@@ -118,7 +138,7 @@ func (r *AlertRepository) Delete(ctx context.Context, id string) error {
 func (r *AlertRepository) EnsureTTLIndex(ctx context.Context) error {
 	// Create TTL index to expire documents 3 days (259200 seconds) after 'timestamp'
 	model := mongo.IndexModel{
-		Keys: bson.M{"timestamp": 1},
+		Keys:    bson.M{"timestamp": 1},
 		Options: options.Index().SetExpireAfterSeconds(259200),
 	}
 	_, err := r.collection.Indexes().CreateOne(ctx, model)

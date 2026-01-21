@@ -36,27 +36,44 @@ func (a *alertUsecase) TriggerSOS(ctx context.Context, userID string, location d
 
 	user, err := a.userRepo.GetByID(ctx, userID)
 	userName := "Unknown"
+	universityID := "Unknown"
 	if err == nil {
 		userName = user.FullName
+		universityID = user.UniversityID
 	}
 
+	// 1. Check if user already has an alert (active or inactive)
+	existingAlert, err := a.alertRepo.GetByUserID(ctx, userID)
+	if err == nil && existingAlert != nil {
+		// Update existing alert
+		existingAlert.Status = "Active"
+		existingAlert.Location = location
+		existingAlert.Timestamp = time.Now().UTC() // Store as UTC
+		existingAlert.UserName = userName
+		existingAlert.UniversityID = universityID
+		existingAlert.Type = domain.AlertSOS // Refresh type if needed
+
+		if err := a.alertRepo.Update(ctx, existingAlert); err != nil {
+			return nil, err
+		}
+		return existingAlert, nil
+	}
+
+	// 2. Create new if none exists
 	alert := &domain.Alert{
-		ID:        uuid.New().String(),
-		UserID:    userID,
-		UserName:  userName,
-		Type:      domain.AlertSOS,
-		Status:    "Active",
-		Location:  location,
-		Timestamp: time.Now(),
+		ID:           uuid.New().String(),
+		UserID:       userID,
+		UserName:     userName,
+		UniversityID: universityID,
+		Type:         domain.AlertSOS,
+		Status:       "Active",
+		Location:     location,
+		Timestamp:    time.Now().UTC(),
 	}
 
 	// TODO: Notify guardians/dispatch logic here
-	// Simulating notification to guardians/security
-	// In a real app, this would use FCM, SMS (Twilio), or WebSocket
 	go func() {
 		// Simulate async notification
-		// log.Printf("ALARM: SOS Triggered by User %s at %v", userID, location)
-		// SendWSNotification(userID, "SOS")
 	}()
 
 	err = a.alertRepo.Create(ctx, alert)

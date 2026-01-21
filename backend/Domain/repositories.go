@@ -27,6 +27,8 @@ type InvitationRepository interface {
 type AlertRepository interface {
 	Create(ctx context.Context, alert *Alert) error
 	GetByID(ctx context.Context, id string) (*Alert, error)
+	GetByUserID(ctx context.Context, userID string) (*Alert, error) // Added single user alert fetch
+	Update(ctx context.Context, alert *Alert) error                 // Added update
 	GetActiveByUserID(ctx context.Context, userID string) ([]*Alert, error)
 	GetAll(ctx context.Context) ([]*Alert, error)
 	UpdateStatus(ctx context.Context, id string, status string) error

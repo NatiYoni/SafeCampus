@@ -17,10 +17,11 @@ const (
 
 // Alert represents an emergency signal triggered by a user.
 type Alert struct {
-	ID        string                 `json:"id" bson:"_id"`
-	UserID    string                 `json:"user_id" bson:"user_id"`
-	UserName  string                 `json:"user_name" bson:"user_name"` // Added user name for easy identification
-	Type      AlertType              `json:"type" bson:"type"`
+	ID           string                 `json:"id" bson:"_id"`
+	UserID       string                 `json:"user_id" bson:"user_id"`
+	UserName     string                 `json:"user_name" bson:"user_name"`       // Added user name for easy identification
+	UniversityID string                 `json:"university_id" bson:"university_id"` // Added univ ID
+	Type         AlertType              `json:"type" bson:"type"`
 	Status    string                 `json:"status" bson:"status"` // e.g., "Active", "Resolved", "False Alarm"
 	Location  Location               `json:"location" bson:"location"`
 	Timestamp time.Time              `json:"timestamp" bson:"timestamp"`
