@@ -42,6 +42,7 @@ func SetupRouter(
 		// Alert / SOS routes
 		api.POST("/alerts/sos", alertHandler.TriggerSOS)
 		api.GET("/alerts/sos", alertHandler.GetAllAlerts)
+		api.GET("/alerts/my-active", alertHandler.GetMyActiveAlert)
 		api.PUT("/alerts/:id/resolve", alertHandler.ResolveAlert)
 
 		// Report routes

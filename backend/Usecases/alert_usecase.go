@@ -14,6 +14,7 @@ type AlertUsecase interface {
 	UpdateLocation(ctx context.Context, alertID string, location domain.Location) error
 	ResolveAlert(ctx context.Context, alertID string) error
 	GetAllAlerts(ctx context.Context) ([]*domain.Alert, error)
+	GetActiveAlertForUser(ctx context.Context, userID string) (*domain.Alert, error)
 }
 
 type alertUsecase struct {
@@ -82,4 +83,10 @@ func (a *alertUsecase) GetAllAlerts(ctx context.Context) ([]*domain.Alert, error
 	ctx, cancel := context.WithTimeout(ctx, a.contextTimeout)
 	defer cancel()
 	return a.alertRepo.GetAll(ctx)
+}
+
+func (a *alertUsecase) GetActiveAlertForUser(ctx context.Context, userID string) (*domain.Alert, error) {
+	ctx, cancel := context.WithTimeout(ctx, a.contextTimeout)
+	defer cancel()
+	return a.alertRepo.GetByUserID(ctx, userID)
 }

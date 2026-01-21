@@ -40,7 +40,12 @@ func (r *AlertRepository) GetByID(ctx context.Context, id string) (*domain.Alert
 
 func (r *AlertRepository) GetByUserID(ctx context.Context, userID string) (*domain.Alert, error) {
 	var alert domain.Alert
-	filter := bson.M{"user_id": userID}
+	// We specifically want the *Active* one for synchronization.
+	// Since we enforce 1 active alert per user, this is safe.
+	filter := bson.M{
+		"user_id": userID,
+		"status":  "Active",
+	}
 	err := r.collection.FindOne(ctx, filter).Decode(&alert)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {

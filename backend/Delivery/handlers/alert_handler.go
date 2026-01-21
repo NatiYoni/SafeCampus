@@ -61,3 +61,23 @@ func (h *AlertHandler) GetAllAlerts(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, alerts)
 }
+
+func (h *AlertHandler) GetMyActiveAlert(c *gin.Context) {
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	alert, err := h.AlertUsecase.GetActiveAlertForUser(c, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if alert == nil {
+		// No active alert is fine, just return null/404 or empty
+		c.JSON(http.StatusNotFound, gin.H{"message": "No active alert"})
+		return
+	}
+	c.JSON(http.StatusOK, alert)
+}
