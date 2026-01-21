@@ -85,6 +85,16 @@ func main() {
 	userRepo := repositories.NewUserRepository(db)
 	invitationRepo := repositories.NewInvitationRepository(db)
 	alertRepo := repositories.NewAlertRepository(db)
+
+	// Ensure TTL Index for Alerts
+	if r, ok := alertRepo.(*repositories.AlertRepository); ok {
+		go func() {
+			if err := r.EnsureTTLIndex(context.Background()); err != nil {
+				log.Printf("Failed to create TTL index: %v", err)
+			}
+		}()
+	}
+
 	reportRepo := repositories.NewReportRepository(db)
 	chatRepo := repositories.NewChatRepository(db)
 	zoneRepo := repositories.NewZoneRepository(db)
