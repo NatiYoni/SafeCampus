@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"time"
@@ -36,12 +37,14 @@ func main() {
 
 	// 2. Initialize Repositories
 	userRepo := repositories.NewUserRepository(db)
+	invitationRepo := repositories.NewInvitationRepository(db)
 	alertRepo := repositories.NewAlertRepository(db)
 	reportRepo := repositories.NewReportRepository(db)
 	chatRepo := repositories.NewChatRepository(db)
 	zoneRepo := repositories.NewZoneRepository(db)
 	walkRepo := repositories.NewWalkRepository(db)
 	timerRepo := repositories.NewSafetyTimerRepository(db)
+	mentalRepo := repositories.NewMentalHealthRepository(db)
 
 	// 2.5 Initialize Infrastructure Services
 	emailService := infrastructure.NewEmailService()
@@ -50,13 +53,34 @@ func main() {
 	// 3. Initialize Usecases
 	timeout := time.Second * 10
 
-	userUsecase := usecases.NewUserUsecase(userRepo, emailService, jwtService, timeout)
+	userUsecase := usecases.NewUserUsecase(userRepo, invitationRepo, emailService, jwtService, timeout)
+
+	// Seed Super Admin
+	seedCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	// Use environment variables or hardcoded fallback
+	adminEmail := os.Getenv("ADMIN_EMAIL")
+	if adminEmail == "" {
+		adminEmail = "admin@safecampus.edu"
+	}
+	adminPass := os.Getenv("ADMIN_PASS")
+	if adminPass == "" {
+		adminPass = "AdminSecret123!"
+	}
+
+	if err := userUsecase.EnsureSuperAdmin(seedCtx, adminEmail, adminPass); err != nil {
+		log.Printf("Warning: Failed to ensure super admin: %v", err)
+	} else {
+		log.Println("Super Admin check completed.")
+	}
+
 	alertUsecase := usecases.NewAlertUsecase(alertRepo, userRepo, timeout)
 	reportUsecase := usecases.NewReportUsecase(reportRepo, timeout)
 	chatUsecase := usecases.NewChatUsecase(chatRepo, timeout)
 	zoneUsecase := usecases.NewZoneUsecase(zoneRepo, timeout)
 	walkUsecase := usecases.NewWalkUseCase(walkRepo)
 	timerUsecase := usecases.NewSafetyTimerUsecase(timerRepo, timeout)
+	mentalUsecase := usecases.NewMentalHealthUsecase(mentalRepo, timeout)
 
 	// 4. Initialize Handlers
 	userHandler := handlers.NewUserHandler(userUsecase)
@@ -66,9 +90,10 @@ func main() {
 	zoneHandler := handlers.NewZoneHandler(zoneUsecase)
 	walkHandler := handlers.NewWalkHandler(walkUsecase)
 	timerHandler := handlers.NewSafetyTimerHandler(timerUsecase)
+	mentalHandler := handlers.NewMentalHealthHandler(mentalUsecase)
 
 	// 5. Setup Router
-	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler, walkHandler, timerHandler)
+	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler, walkHandler, timerHandler, mentalHandler)
 
 	// 6. Run Server
 	port := os.Getenv("PORT")
