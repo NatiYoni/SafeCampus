@@ -16,6 +16,7 @@ func SetupRouter(
 	walkHandler *handlers.WalkHandler,
 	timerHandler *handlers.SafetyTimerHandler,
 	mentalHandler *handlers.MentalHealthHandler,
+	campusHandler *handlers.CampusHandler,
 	jwtService *infrastructure.JWTService,
 ) *gin.Engine {
 	r := gin.Default()
@@ -68,6 +69,10 @@ func SetupRouter(
 
 		// Mental Health routes
 		api.GET("/mental-health", mentalHandler.GetResources)
+
+		// Campus Radar routes
+		api.POST("/campus/heartbeat", campusHandler.Heartbeat)
+		api.GET("/campus/status", campusHandler.GetCampusStatus)
 	}
 
 

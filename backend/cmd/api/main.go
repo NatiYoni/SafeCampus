@@ -99,6 +99,7 @@ func main() {
 	chatRepo := repositories.NewChatRepository(db)
 	zoneRepo := repositories.NewZoneRepository(db)
 	walkRepo := repositories.NewWalkRepository(db)
+	campusRepo := repositories.NewCampusRepository(db) // Added CampusRepo
 	timerRepo := repositories.NewSafetyTimerRepository(db)
 	mentalRepo := repositories.NewMentalHealthRepository(db)
 
@@ -116,6 +117,7 @@ func main() {
 	chatUsecase := usecases.NewChatUsecase(chatRepo, timeout)
 	zoneUsecase := usecases.NewZoneUsecase(zoneRepo, timeout)
 	walkUsecase := usecases.NewWalkUseCase(walkRepo)
+	campusUsecase := usecases.NewCampusUseCase(campusRepo) // Added CampusUseCase, no timeout passed in constructor logic provided earlier
 	timerUsecase := usecases.NewSafetyTimerUsecase(timerRepo, timeout)
 	mentalUsecase := usecases.NewMentalHealthUsecase(mentalRepo, timeout)
 
@@ -126,11 +128,12 @@ func main() {
 	chatHandler := handlers.NewChatHandler(chatUsecase)
 	zoneHandler := handlers.NewZoneHandler(zoneUsecase)
 	walkHandler := handlers.NewWalkHandler(walkUsecase)
+	campusHandler := handlers.NewCampusHandler(campusUsecase) // Added CampusHandler
 	timerHandler := handlers.NewSafetyTimerHandler(timerUsecase)
 	mentalHandler := handlers.NewMentalHealthHandler(mentalUsecase)
 
 	// 5. Setup Router
-	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler, walkHandler, timerHandler, mentalHandler, jwtService)
+	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler, walkHandler, timerHandler, mentalHandler, campusHandler, jwtService)
 
 	// 6. Run Server
 	port := os.Getenv("PORT")
