@@ -4,6 +4,7 @@ import '../../../../injection_container.dart' as di;
 import '../bloc/admin_sos_bloc.dart';
 import '../bloc/admin_sos_event.dart';
 import '../bloc/admin_sos_state.dart';
+import 'package:intl/intl.dart';
 
 class AdminSosPage extends StatelessWidget {
   const AdminSosPage({super.key});
@@ -35,9 +36,10 @@ class AdminSosPage extends StatelessWidget {
                        subtitle: Column(
                          crossAxisAlignment: CrossAxisAlignment.start,
                          children: [
-                           Text("User: ${alert.userName ?? 'Unknown'} (ID: ${alert.userId})"),
+                           Text("User: ${alert.userName ?? 'Unknown'}"),
+                           Text("Uni ID: ${alert.universityId ?? 'Unknown'} (ID: ${alert.userId})"),
                            Text("Location: ${alert.latitude.toStringAsFixed(4)}, ${alert.longitude.toStringAsFixed(4)}"),
-                           Text("Time: ${alert.timestamp}"),
+                           Text("Time: ${DateFormat.yMMMd().add_jm().format(alert.timestamp.toLocal())}"),
                          ],
                        ),
                        isThreeLine: true,
