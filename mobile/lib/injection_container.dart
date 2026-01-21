@@ -25,6 +25,7 @@ import 'features/emergency/data/repositories/emergency_repository_impl.dart';
 import 'features/emergency/domain/repositories/emergency_repository.dart';
 import 'features/emergency/domain/usecases/trigger_sos.dart';
 import 'features/emergency/domain/usecases/get_alerts.dart';
+import 'features/emergency/domain/usecases/cancel_sos.dart';
 import 'features/emergency/presentation/bloc/emergency_bloc.dart';
 
 import 'features/friend_walk/data/datasources/friend_walk_remote_data_source.dart';
@@ -99,10 +100,6 @@ Future<void> init() async {
   sl.registerLazySingleton<ChatRepository>(() => ChatRepositoryImpl(remoteDataSource: sl()));
   // Data sources
   sl.registerLazySingleton<ChatRemoteDataSource>(() => ChatRemoteDataSourceImpl(client: sl()));
-
-import 'features/emergency/domain/usecases/cancel_sos.dart';
-
-// ... existing imports ...
 
   //! Features - Emergency (SOS)
   // Bloc
