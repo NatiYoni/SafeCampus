@@ -67,3 +67,12 @@ func (h *WalkHandler) EndWalk(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "walk ended"})
 }
+
+func (h *WalkHandler) GetAllActiveWalks(c *gin.Context) {
+	walks, err := h.WalkUseCase.GetAllActiveWalks(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, walks)
+}
