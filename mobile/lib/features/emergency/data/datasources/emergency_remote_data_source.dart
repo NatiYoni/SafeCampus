@@ -24,6 +24,7 @@ class EmergencyRemoteDataSourceImpl implements EmergencyRemoteDataSource {
         id: json['id'],
         userId: json['user_id'],
         userName: json['user_name'], // Map user_name
+        universityId: json['university_id'],
         type: AlertType.sos, // Defaulting to SOS for now as it's the main one
         status: json['status'],
         timestamp: DateTime.parse(json['timestamp']),
@@ -59,6 +60,7 @@ class EmergencyRemoteDataSourceImpl implements EmergencyRemoteDataSource {
         id: data['id'] ?? 'temp-id',
         userId: data['user_id'],
         userName: data['user_name'],
+        universityId: data['university_id'],
         type: AlertType.sos,
         status: data['status'],
         timestamp: DateTime.parse(data['timestamp']),
