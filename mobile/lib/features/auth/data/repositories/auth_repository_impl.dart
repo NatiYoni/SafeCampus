@@ -18,4 +18,50 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> register(String email, String password, String fullName, String phoneNumber, String universityId) async {
+    try {
+      await remoteDataSource.register(email, password, fullName, phoneNumber, universityId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> verifyEmail(String email, String code) async {
+    try {
+      await remoteDataSource.verifyEmail(email, code);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resendVerification(String email) async {
+    try {
+      await remoteDataSource.resendVerification(email);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> logout() async {
+    try {
+      await remoteDataSource.logout();
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> getCurrentUser() {
+    // TODO: implement getCurrentUser logic (e.g. from local storage or cached)
+    throw UnimplementedError();
+  }
 }

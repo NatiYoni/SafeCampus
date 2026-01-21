@@ -6,7 +6,9 @@ class User extends Equatable {
   final String fullName;
   final String phoneNumber;
   final String universityId;
-  final Profile profile;
+  final bool isVerified;
+  final String role; // Added role field
+  final Profile? profile; 
 
   const User({
     required this.id,
@@ -14,11 +16,13 @@ class User extends Equatable {
     required this.fullName,
     required this.phoneNumber,
     required this.universityId,
-    required this.profile,
+    required this.isVerified,
+    required this.role,
+    this.profile,
   });
 
   @override
-  List<Object?> get props => [id, email, fullName, phoneNumber, universityId, profile];
+  List<Object?> get props => [id, email, fullName, phoneNumber, universityId, isVerified, role, profile];
 }
 
 class Profile extends Equatable {
