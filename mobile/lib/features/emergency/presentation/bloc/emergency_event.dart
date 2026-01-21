@@ -4,7 +4,7 @@ abstract class EmergencyEvent extends Equatable {
   const EmergencyEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class TriggerSosEvent extends EmergencyEvent {
@@ -13,5 +13,14 @@ class TriggerSosEvent extends EmergencyEvent {
   const TriggerSosEvent(this.userId);
 
   @override
-  List<Object> get props => [userId];
+  List<Object?> get props => [userId];
+}
+
+class CancelSosEvent extends EmergencyEvent {
+  final String alertId;
+
+  const CancelSosEvent(this.alertId);
+
+  @override
+  List<Object?> get props => [alertId];
 }
