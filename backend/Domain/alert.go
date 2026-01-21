@@ -35,5 +35,6 @@ type Location struct {
 	Accuracy  float64   `json:"accuracy,omitempty" bson:"accuracy,omitempty"`
 	Floor     int       `json:"floor,omitempty" bson:"floor,omitempty"` // For Indoor Positioning
 	Building  string    `json:"building,omitempty" bson:"building,omitempty"`
+	Heading   float64   `json:"heading,omitempty" bson:"heading,omitempty"` // Direction in degrees
 	Timestamp time.Time `json:"timestamp,omitempty" bson:"timestamp,omitempty"` // Added for tracking paths
 }
