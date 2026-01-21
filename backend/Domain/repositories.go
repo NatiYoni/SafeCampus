@@ -31,7 +31,8 @@ type AlertRepository interface {
 	GetAll(ctx context.Context) ([]*Alert, error)
 	UpdateStatus(ctx context.Context, id string, status string) error
 	FetchNearby(ctx context.Context, loc Location, radius float64) ([]*Alert, error)
-}
+	Delete(ctx context.Context, id string) error
+} // Added Delete to interface
 
 // ReportRepository defines the interface for report persistence.
 type ReportRepository interface {
