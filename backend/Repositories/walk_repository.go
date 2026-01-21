@@ -80,5 +80,8 @@ func (r *WalkRepository) GetAllActiveWalks(ctx context.Context) ([]*domain.WalkS
 	if err = cursor.All(ctx, &sessions); err != nil {
 		return nil, err
 	}
+	if sessions == nil {
+		return []*domain.WalkSession{}, nil
+	}
 	return sessions, nil
 }
