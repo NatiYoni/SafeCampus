@@ -105,13 +105,15 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             );
           }
         },
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Enter the 6-digit code sent to\n${widget.email}',
+        child: SafeArea( // Added SafeArea
+          child: SingleChildScrollView( // Added ScrollView
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Enter the 6-digit code sent to\n${widget.email}',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(color: Colors.grey[600], fontSize: 16),
               ),
@@ -179,6 +181,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             ],
           ),
         ),
+      ),
+      ),
       ),
     );
   }

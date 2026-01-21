@@ -73,9 +73,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           }
         },
         builder: (context, state) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -162,6 +163,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ],
               ),
             ),
+          ),
           );
         },
       ),

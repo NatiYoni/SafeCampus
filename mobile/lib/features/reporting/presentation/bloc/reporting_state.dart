@@ -21,3 +21,10 @@ class ReportingError extends ReportingState {
   @override
   List<Object> get props => [message];
 }
+
+class ReportsLoaded extends ReportingState {
+  final List<Report> reports;
+  const ReportsLoaded(this.reports);
+  @override
+  List<Object> get props => [reports];
+}

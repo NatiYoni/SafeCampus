@@ -21,7 +21,13 @@ class WelcomeScreen extends StatelessWidget {
               Image.asset(
                 'assets/images/logo.png',
                 height: 150,
-                width: 150,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.shield_outlined,
+                    size: 150,
+                    color: Theme.of(context).primaryColor,
+                  );
+                },
               ),
               const SizedBox(height: 24),
               Text(

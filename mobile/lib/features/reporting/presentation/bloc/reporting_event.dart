@@ -23,3 +23,5 @@ class SubmitReportRequested extends ReportingEvent {
   @override
   List<Object> get props => [userId, category, description, isAnonymous];
 }
+
+class FetchReportsRequested extends ReportingEvent {}

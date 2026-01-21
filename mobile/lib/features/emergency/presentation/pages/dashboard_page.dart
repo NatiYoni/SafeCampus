@@ -92,7 +92,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
               
-              // Features Grid
+          // Features Grid
           Expanded(
             flex: 2,
             child: GridView.count(
@@ -103,41 +103,46 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 _buildFeatureCard(
                   context,
-                  Icons.directions_walk, 
-                  'Friend Walk', 
+                  Icons.directions_walk,
+                  'Friend Walk',
                   Colors.green,
                   () => context.push('/friend-walk'),
                 ),
                 _buildFeatureCard(
-                  context, 
-                  Icons.warning, 
-                  'Report Hazard', 
+                  context,
+                  Icons.warning,
+                  'Report Hazard',
                   Colors.orange,
                   () => context.push('/report'),
                 ),
                 _buildFeatureCard(
-                  context, 
-                  Icons.access_time, 
-                  'Safety Timer', 
-                  Colors.blue, 
+                  context,
+                  Icons.access_time,
+                  'Safety Timer',
+                  Colors.blue,
                   () => context.push('/safety-timer'),
                 ),
                 _buildFeatureCard(
-                  context, 
-                  Icons.psychology, 
-                  'Mental Health', 
-                  Colors.purple, 
+                  context,
+                  Icons.psychology,
+                  'Mental Health',
+                  Colors.purple,
                   () => context.push('/mental-health'),
                 ),
               ],
             ),
           ),
-          
+
           // Temporary Admin Access for Demo
-          TextButton.icon(
-            onPressed: () => context.push('/admin'),
-            icon: const Icon(Icons.admin_panel_settings),
-            label: const Text("Go to Admin Console"),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: TextButton.icon(
+                onPressed: () => context.push('/admin'),
+                icon: const Icon(Icons.admin_panel_settings),
+                label: const Text("Go to Admin Console"),
+              ),
+            ),
           ),
         ],
       );
