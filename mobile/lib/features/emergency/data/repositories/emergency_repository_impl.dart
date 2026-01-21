@@ -20,6 +20,16 @@ class EmergencyRepositoryImpl implements EmergencyRepository {
   }
 
   @override
+  Future<Either<Failure, void>> cancelSos(String alertId) async {
+    try {
+      await remoteDataSource.cancelSos(alertId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<Alert>>> getAlerts() async {
     try {
       final alerts = await remoteDataSource.getAlerts();
