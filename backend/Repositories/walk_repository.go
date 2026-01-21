@@ -69,3 +69,16 @@ func (r *WalkRepository) GetActiveWalksByGuardian(ctx context.Context, guardianI
 	}
 	return sessions, nil
 }
+
+func (r *WalkRepository) GetAllActiveWalks(ctx context.Context) ([]*domain.WalkSession, error) {
+	var sessions []*domain.WalkSession
+	filter := bson.M{"status": "active"}
+	cursor, err := r.collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	if err = cursor.All(ctx, &sessions); err != nil {
+		return nil, err
+	}
+	return sessions, nil
+}
