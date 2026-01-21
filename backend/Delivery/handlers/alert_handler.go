@@ -19,8 +19,14 @@ func NewAlertHandler(a usecases.AlertUsecase) *AlertHandler {
 }
 
 func (h *AlertHandler) TriggerSOS(c *gin.Context) {
+	// Get ID from authenticated user (Middleware)
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	var req struct {
-		UserID   string          `json:"user_id"`
 		Location domain.Location `json:"location"`
 	}
 
@@ -29,7 +35,7 @@ func (h *AlertHandler) TriggerSOS(c *gin.Context) {
 		return
 	}
 
-	alert, err := h.AlertUsecase.TriggerSOS(c, req.UserID, req.Location)
+	alert, err := h.AlertUsecase.TriggerSOS(c, userID, req.Location)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

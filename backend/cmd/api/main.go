@@ -130,7 +130,7 @@ func main() {
 	mentalHandler := handlers.NewMentalHealthHandler(mentalUsecase)
 
 	// 5. Setup Router
-	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler, walkHandler, timerHandler, mentalHandler)
+	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler, walkHandler, timerHandler, mentalHandler, jwtService)
 
 	// 6. Run Server
 	port := os.Getenv("PORT")

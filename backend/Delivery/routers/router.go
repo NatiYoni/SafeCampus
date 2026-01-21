@@ -2,6 +2,8 @@ package routers
 
 import (
 	"github.com/StartUp/safecampus/backend/Delivery/handlers"
+	"github.com/StartUp/safecampus/backend/Delivery/middleware"
+	infrastructure "github.com/StartUp/safecampus/backend/Infrastructure"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,6 +16,7 @@ func SetupRouter(
 	walkHandler *handlers.WalkHandler,
 	timerHandler *handlers.SafetyTimerHandler,
 	mentalHandler *handlers.MentalHealthHandler,
+	jwtService *infrastructure.JWTService,
 ) *gin.Engine {
 	r := gin.Default()
 
@@ -34,6 +37,7 @@ func SetupRouter(
 
 	// Protected routes (Add middleware later)
 	api := r.Group("/api")
+	api.Use(middleware.AuthMiddleware(jwtService))
 	{
 		// Alert / SOS routes
 		api.POST("/alerts/sos", alertHandler.TriggerSOS)
