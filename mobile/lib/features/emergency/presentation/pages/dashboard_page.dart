@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:geolocator/geolocator.dart';
 import '../bloc/emergency_bloc.dart';
 import '../bloc/emergency_event.dart';
 import '../bloc/emergency_state.dart';
@@ -13,6 +14,60 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  Future<void> _checkAndTriggerSos() async {
+    // 1. Check Service Status
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text("Location Required"),
+          content: const Text("Location services are required for SOS. Please turn them on."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await Geolocator.openLocationSettings();
+                // Recursively check until enabled or user cancels
+                _checkAndTriggerSos();
+              },
+              child: const Text("Turn On & Retry"),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // 2. Check Permissions (Optional, but good practice to prevent exceptions)
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Location permission denied")));
+        return;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Location permission permanently denied")));
+      return;
+    }
+
+    if (!mounted) return;
+    context.read<EmergencyBloc>().add(const TriggerSosEvent("user-123")); 
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sending SOS Signal...')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,6 +103,33 @@ class _DashboardPageState extends State<DashboardPage> {
             return const Center(child: CircularProgressIndicator());
           }
           
+          // Show "I Am Safe" button if SOS is active (state is SosTriggered)
+          if (state is SosTriggered) {
+             return Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: [
+                 const Text(
+                   "SOS Active!",
+                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red),
+                 ),
+                 const SizedBox(height: 20),
+                 const CircularProgressIndicator(color: Colors.red),
+                 const SizedBox(height: 20),
+                 ElevatedButton.icon(
+                   style: ElevatedButton.styleFrom(
+                     backgroundColor: Colors.green,
+                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                   ),
+                   onPressed: () {
+                     context.read<EmergencyBloc>().add(CancelSosEvent(state.alert.id));
+                   },
+                   icon: const Icon(Icons.check_circle),
+                   label: const Text("I Am Safe", style: TextStyle(fontSize: 20)),
+                 ),
+               ],
+             );
+          }
+
           return Column(
             children: [
               // Emergency SOS Section
@@ -55,13 +137,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 flex: 2,
                 child: Center(
                   child: GestureDetector(
-                    onLongPress: () {
-                      // Trigger SOS on Long Press
-                      context.read<EmergencyBloc>().add(const TriggerSosEvent("user-123")); // Use actual User ID later
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Sending SOS Location...')),
-                      );
-                    },
+                    onLongPress: _checkAndTriggerSos,
                     child: Container(
                       width: 200,
                       height: 200,
