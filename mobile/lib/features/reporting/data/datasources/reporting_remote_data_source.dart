@@ -14,7 +14,7 @@ class ReportingRemoteDataSourceImpl implements ReportingRemoteDataSource {
   @override
   Future<ReportModel> createReport(String userId, String category, String description, bool isAnonymous) async {
     final response = await client.post(
-      '/reports',
+      '/api/reports',
       data: {
         'user_id': userId,
         'category': category,

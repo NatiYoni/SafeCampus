@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/set_timer.dart';
+import '../../domain/usecases/cancel_timer.dart';
 import 'safety_timer_event.dart';
 import 'safety_timer_state.dart';
 

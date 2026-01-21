@@ -15,7 +15,7 @@ class SafetyTimerRemoteDataSourceImpl implements SafetyTimerRemoteDataSource {
   @override
   Future<SafetyTimerModel> setTimer(String userId, int durationMinutes, List<String> guardians) async {
     final response = await client.post(
-      '/timers',
+      '/api/timers',
       data: {
         'user_id': userId,
         'duration_minutes': durationMinutes,
@@ -27,6 +27,6 @@ class SafetyTimerRemoteDataSourceImpl implements SafetyTimerRemoteDataSource {
 
   @override
   Future<void> cancelTimer(String timerId) async {
-    await client.post('/timers/$timerId/cancel');
+    await client.post('/api/timers/$timerId/cancel');
   }
 }

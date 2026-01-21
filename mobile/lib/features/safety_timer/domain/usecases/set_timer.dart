@@ -23,12 +23,3 @@ class SetTimerParams {
   SetTimerParams({required this.userId, required this.durationMinutes, required this.guardians});
 }
 
-class CancelTimer implements UseCase<void, String> {
-  final SafetyTimerRepository repository;
-  CancelTimer(this.repository);
-
-  @override
-  Future<Either<Failure, void>> call(String timerId) async {
-    return await repository.cancelTimer(timerId);
-  }
-}

@@ -16,7 +16,7 @@ class FriendWalkRemoteDataSourceImpl implements FriendWalkRemoteDataSource {
   @override
   Future<WalkSessionModel> startWalk(String userId, String guardianId) async {
     final response = await client.post(
-      '/walks/start',
+      '/api/walks/start',
       data: {
         'walker_id': userId,
         'guardian_id': guardianId,
@@ -28,7 +28,7 @@ class FriendWalkRemoteDataSourceImpl implements FriendWalkRemoteDataSource {
   @override
   Future<void> updateLocation(String walkId, double lat, double lng) async {
     await client.post(
-      '/walks/$walkId/location',
+      '/api/walks/$walkId/location',
       data: {
         'lat': lat,
         'lng': lng,
@@ -38,6 +38,6 @@ class FriendWalkRemoteDataSourceImpl implements FriendWalkRemoteDataSource {
 
   @override
   Future<void> endWalk(String walkId) async {
-    await client.post('/walks/$walkId/end');
+    await client.post('/api/walks/$walkId/end');
   }
 }

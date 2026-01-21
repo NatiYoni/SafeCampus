@@ -1,4 +1,4 @@
-import '../../../core/usecases/usecase.dart';
+import '../../../../core/usecases/usecase.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../../domain/entities/message.dart';
 

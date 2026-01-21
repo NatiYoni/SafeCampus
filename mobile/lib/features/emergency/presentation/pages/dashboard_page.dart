@@ -122,11 +122,26 @@ class _DashboardPageState extends State<DashboardPage> {
                   Colors.blue, 
                   () => context.push('/safety-timer'),
                 ),
-                _buildFeatureCard(context, Icons.psychology, 'Mental Health', Colors.purple, () {}),
+                _buildFeatureCard(
+                  context, 
+                  Icons.psychology, 
+                  'Mental Health', 
+                  Colors.purple, 
+                  () => context.push('/mental-health'),
+                ),
               ],
             ),
           ),
+          
+          // Temporary Admin Access for Demo
+          TextButton.icon(
+            onPressed: () => context.push('/admin'),
+            icon: const Icon(Icons.admin_panel_settings),
+            label: const Text("Go to Admin Console"),
+          ),
         ],
+      );
+        },
       ),
     );
   }

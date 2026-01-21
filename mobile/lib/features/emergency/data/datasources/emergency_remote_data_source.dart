@@ -19,7 +19,7 @@ class EmergencyRemoteDataSourceImpl implements EmergencyRemoteDataSource {
 
     // 2. Send to Backend
     final response = await client.post(
-      '/alerts',
+      '/api/alerts/sos',
       data: jsonEncode({
         "user_id": userId,
         "location": {
