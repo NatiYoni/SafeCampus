@@ -51,6 +51,12 @@ func (r *AlertRepository) GetByUserID(ctx context.Context, userID string) (*doma
 	return &alert, nil
 }
 
+func (r *AlertRepository) DeleteByUserID(ctx context.Context, userID string) error {
+	filter := bson.M{"user_id": userID}
+	_, err := r.collection.DeleteMany(ctx, filter)
+	return err
+}
+
 func (r *AlertRepository) Update(ctx context.Context, alert *domain.Alert) error {
 	filter := bson.M{"_id": alert.ID}
 	update := bson.M{"$set": alert}
