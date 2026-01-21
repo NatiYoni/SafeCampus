@@ -31,31 +31,67 @@ class AdminReportsPage extends StatelessWidget {
                   return Card(
                     elevation: 2,
                     margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.orangeAccent,
-                        child: Text(report.category[0]),
-                      ),
-                      title: Text(
-                        report.category,
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Column(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(report.description),
-                          const SizedBox(height: 4),
+                          // Top Row: Category (Type) and Status
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.indigo.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  report.category,
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.indigo,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              Chip(
+                                label: Text(report.status, style: const TextStyle(fontSize: 10)),
+                                backgroundColor: report.status == "Reviewed" 
+                                    ? Colors.green[100] 
+                                    : Colors.amber[100],
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          // Message
                           Text(
-                            report.timestamp.toString().substring(0, 16),
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            report.description,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 12),
+                          // Bottom Row: Timestamp and Name (if not anonymous)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                report.timestamp.toString().substring(0, 16),
+                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              ),
+                              if (!report.isAnonymous && report.userName != null)
+                                Text(
+                                  "Reported by: ${report.userName}", 
+                                  style: const TextStyle(
+                                    fontSize: 12, 
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w500
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
-                      ),
-                      trailing: Chip(
-                        label: Text(report.status),
-                        backgroundColor: report.status == "Reviewed" 
-                            ? Colors.green[100] 
-                            : Colors.amber[100],
                       ),
                     ),
                   );
