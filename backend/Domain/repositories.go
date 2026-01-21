@@ -59,3 +59,8 @@ type SafetyTimerRepository interface {
 	UpdateStatus(ctx context.Context, id string, status TimerStatus) error
 	GetActiveByUserID(ctx context.Context, userID string) (*SafetyTimer, error)
 }
+
+// MentalHealthRepository defines the interface for mental health resources.
+type MentalHealthRepository interface {
+	GetAllResources(ctx context.Context) ([]*MentalHealthResource, error)
+}

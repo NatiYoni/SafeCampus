@@ -1,16 +1,30 @@
 package usecases
 
 import (
+	"context"
 	"time"
 
-	repositories "github.com/StartUp/safecampus/backend/Repositories"
+	domain "github.com/StartUp/safecampus/backend/Domain"
 )
 
-type MentalHealthUsecase struct {
-	repo           *repositories.MentalHealthRepository // Using concrete type as interface definition was in domain but not strictly separated here in previous patterns
+type MentalHealthUsecase interface {
+	GetResources(ctx context.Context) ([]*domain.MentalHealthResource, error)
+}
+
+type mentalHealthUsecase struct {
+	repo           domain.MentalHealthRepository
 	contextTimeout time.Duration
 }
 
-// Fixed: Import cycle if we use repositories package in usecases signature if domain interface isn't clean.
-// Let's stick to domain interfaces if possible, but for now I'll use the interface I defined in domain.go (Wait, I put the interface in domain/mental_health.go but it needs "context").
-// Let me fix domain/mental_health.go first to include "context"
+func NewMentalHealthUsecase(repo domain.MentalHealthRepository, timeout time.Duration) MentalHealthUsecase {
+	return &mentalHealthUsecase{
+		repo:           repo,
+		contextTimeout: timeout,
+	}
+}
+
+func (u *mentalHealthUsecase) GetResources(ctx context.Context) ([]*domain.MentalHealthResource, error) {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+	return u.repo.GetAllResources(ctx)
+}
