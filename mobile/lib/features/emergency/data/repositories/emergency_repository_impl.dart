@@ -30,6 +30,16 @@ class EmergencyRepositoryImpl implements EmergencyRepository {
   }
 
   @override
+  Future<Either<Failure, Alert?>> getMyActiveAlert() async {
+    try {
+      final alert = await remoteDataSource.getMyActiveAlert();
+      return Right(alert);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<Alert>>> getAlerts() async {
     try {
       final alerts = await remoteDataSource.getAlerts();

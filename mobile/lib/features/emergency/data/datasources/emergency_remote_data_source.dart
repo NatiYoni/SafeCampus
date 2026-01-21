@@ -7,12 +7,39 @@ abstract class EmergencyRemoteDataSource {
   Future<Alert> triggerSos(String userId);
   Future<void> cancelSos(String alertId);
   Future<List<Alert>> getAlerts();
+  Future<Alert?> getMyActiveAlert();
 }
 
 class EmergencyRemoteDataSourceImpl implements EmergencyRemoteDataSource {
   final Dio client;
 
   EmergencyRemoteDataSourceImpl({required this.client});
+
+  @override
+  Future<Alert?> getMyActiveAlert() async {
+    try {
+      final response = await client.get('/api/alerts/my-active');
+      if (response.statusCode == 200 && response.data != null) {
+        return Alert(
+          id: response.data['id'],
+          userId: response.data['user_id'],
+          userName: response.data['user_name'],
+          universityId: response.data['university_id'],
+          type: AlertType.sos, 
+          status: response.data['status'],
+          timestamp: DateTime.parse(response.data['timestamp']),
+          latitude: response.data['location']['latitude'],
+          longitude: response.data['location']['longitude'],
+        );
+      }
+      return null;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return null;
+      }
+      throw e;
+    }
+  }
 
   @override
   Future<List<Alert>> getAlerts() async {
@@ -74,9 +101,11 @@ class EmergencyRemoteDataSourceImpl implements EmergencyRemoteDataSource {
 
   @override
   Future<void> cancelSos(String alertId) async {
-    final response = await client.delete('/api/alerts/$alertId');
+    // Backend API: api.PUT("/alerts/:id/resolve", alertHandler.ResolveAlert)
+    final response = await client.put('/api/alerts/$alertId/resolve');
+    
     if (response.statusCode != 200) {
-      throw Exception('Failed to cancel SOS');
+       throw Exception('Failed to cancel SOS');
     }
   }
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'dart:async';
 import '../bloc/emergency_bloc.dart';
 import '../bloc/emergency_event.dart';
 import '../bloc/emergency_state.dart';
@@ -14,6 +16,37 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  Timer? _timer;
+  int _countdown = 3;
+  bool _isHolding = false;
+
+  void _startCountdown(VoidCallback onComplete) {
+     setState(() {
+       _isHolding = true;
+       _countdown = 3;
+     });
+     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+       if (_countdown > 1) {
+         setState(() {
+           _countdown--;
+         });
+       } else {
+         _cancelCountdown(); 
+         onComplete();
+       }
+     });
+  }
+
+  void _cancelCountdown() {
+    _timer?.cancel();
+    if (mounted) {
+      setState(() {
+         _isHolding = false;
+         _countdown = 3;
+      });
+    }
+  }
+
   Future<void> _checkAndTriggerSos() async {
     // 1. Check Service Status
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -87,9 +120,9 @@ class _DashboardPageState extends State<DashboardPage> {
           if (state is SosTriggered) {
              ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('SOS Signal Received! Help is on the way.'),
-                backgroundColor: Colors.green,
-                duration: Duration(seconds: 5),
+                content: Text('SOS Activated! Emergency services notified.'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
               ),
             );
           } else if (state is EmergencyError) {
@@ -99,154 +132,177 @@ class _DashboardPageState extends State<DashboardPage> {
           }
         },
         builder: (context, state) {
-          if (state is EmergencyLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          final isActivated = state is SosTriggered;
           
-          // Show "I Am Safe" button if SOS is active (state is SosTriggered)
-          if (state is SosTriggered) {
-             return Column(
-               mainAxisAlignment: MainAxisAlignment.center,
-               children: [
-                 const Text(
-                   "SOS Active!",
-                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red),
-                 ),
-                 const SizedBox(height: 20),
-                 const CircularProgressIndicator(color: Colors.red),
-                 const SizedBox(height: 20),
-                 ElevatedButton.icon(
-                   style: ElevatedButton.styleFrom(
-                     backgroundColor: Colors.green,
-                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                   ),
-                   onPressed: () {
-                     context.read<EmergencyBloc>().add(CancelSosEvent(state.alert.id));
-                   },
-                   icon: const Icon(Icons.check_circle),
-                   label: const Text("I Am Safe", style: TextStyle(fontSize: 20)),
-                 ),
-               ],
-             );
-          }
-
-          return Column(
-            children: [
-              // Emergency SOS Section
-              Expanded(
-                flex: 2,
-                child: Center(
-                  child: GestureDetector(
-                    onLongPress: _checkAndTriggerSos,
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.5),
-                            blurRadius: 20,
-                            spreadRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.sos, size: 60, color: Colors.white),
-                          Text(
-                            'HOLD FOR SOS',
-                            style: TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              
-          // Features Grid
-          Expanded(
-            flex: 2,
-            child: GridView.count(
-              crossAxisCount: 2,
-              padding: const EdgeInsets.all(16),
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: [
-                _buildFeatureCard(
-                  context,
-                  Icons.directions_walk,
-                  'Friend Walk',
-                  Colors.green,
-                  () => context.push('/friend-walk'),
-                ),
-                _buildFeatureCard(
-                  context,
-                  Icons.warning,
-                  'Report Hazard',
-                  Colors.orange,
-                  () => context.push('/report'),
-                ),
-                _buildFeatureCard(
-                  context,
-                  Icons.access_time,
-                  'Safety Timer',
-                  Colors.blue,
-                  () => context.push('/safety-timer'),
-                ),
-                _buildFeatureCard(
-                  context,
-                  Icons.psychology,
-                  'Mental Health',
-                  Colors.purple,
-                  () => context.push('/mental-health'),
-                ),
-              ],
-            ),
-          ),
-
-          // Temporary Admin Access for Demo
-          SafeArea(
+          return SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: TextButton.icon(
-                onPressed: () => context.push('/admin'),
-                icon: const Icon(Icons.admin_panel_settings),
-                label: const Text("Go to Admin Console"),
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                   const SizedBox(height: 40),
+                   // SOS Button
+                   Center(
+                     child: GestureDetector(
+                       onTapDown: (_) => _startCountdown(
+                         isActivated 
+                           ? () {
+                               final alertId = state.alert.id;
+                               context.read<EmergencyBloc>().add(CancelSosEvent(alertId));
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 const SnackBar(content: Text('Deactivating SOS...')),
+                               );
+                             }
+                           : _checkAndTriggerSos
+                       ),
+                       onTapUp: (_) => _cancelCountdown(),
+                       onTapCancel: () => _cancelCountdown(),
+                       onTap: () {
+                           ScaffoldMessenger.of(context).showSnackBar(
+                             SnackBar(content: Text('Hold button for 3 seconds to ${isActivated ? "cancel" : "trigger"} SOS')),
+                           );
+                       },
+                       child: AnimatedContainer(
+                         duration: const Duration(milliseconds: 300),
+                         height: 250,
+                         width: 250,
+                         decoration: BoxDecoration(
+                           color: isActivated ? Colors.red : Colors.green.shade400, // Red if active, Green if safe
+                           shape: BoxShape.circle,
+                           boxShadow: [
+                             BoxShadow(
+                               color: (isActivated ? Colors.red : Colors.green).withOpacity(0.4),
+                               blurRadius: 30,
+                               spreadRadius: 10,
+                             ),
+                           ],
+                         ),
+                         child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             Icon(
+                               isActivated ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+                               color: Colors.white,
+                               size: 64,
+                             ),
+                             const SizedBox(height: 10),
+                             Text(
+                               isActivated 
+                                 ? (_isHolding ? "CANCELLING $_countdown..." : "SOS ACTIVATED")
+                                 : (_isHolding ? "SENDING IN $_countdown..." : "YOU ARE SAFE"),
+                               style: GoogleFonts.bebasNeue(
+                                 fontSize: 32,
+                                 color: Colors.white,
+                                 letterSpacing: 2,
+                               ),
+                             ),
+                             const SizedBox(height: 5),
+                             Text(
+                               isActivated 
+                                 ? (_isHolding ? "Keep Holding" : "Hold to Mark Safe")
+                                 : (_isHolding ? "Keep Holding" : "Hold for SOS"),
+                               style: const TextStyle(
+                                 color: Colors.white70,
+                                 fontSize: 16,
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ),
+                   ),
+                   
+                   const SizedBox(height: 60),
+
+                  // Quick Actions Grid (Restored)
+                   GridView.count(
+                       shrinkWrap: true,
+                       physics: const NeverScrollableScrollPhysics(),
+                       crossAxisCount: 2,
+                       crossAxisSpacing: 16,
+                       mainAxisSpacing: 16,
+                       children: [
+                         _buildQuickActionCard(
+                           context,
+                           'Friend Walk',
+                           Icons.directions_walk,
+                           Colors.purple,
+                           () => context.push('/friend-walk'),
+                         ),
+                         _buildQuickActionCard(
+                           context,
+                           'Report Incident',
+                           Icons.report_problem,
+                           Colors.orange,
+                           () => context.push('/report'),
+                         ),
+                         _buildQuickActionCard(
+                           context,
+                           'Safety Timer',
+                           Icons.timer,
+                           Colors.blue,
+                           () => context.push('/safety-timer'),
+                         ),
+                         _buildQuickActionCard(
+                           context,
+                           'Mental Health',
+                           Icons.favorite,
+                           Colors.teal,
+                           () => context.push('/mental-health'),
+                         ),
+                       ],
+                     ),
+                     const SizedBox(height: 20),
+                     // Temporary Admin Access for Demo
+                     TextButton.icon(
+                        onPressed: () => context.push('/admin'),
+                        icon: const Icon(Icons.admin_panel_settings),
+                        label: const Text("Go to Admin Console"),
+                     ),
+                ],
               ),
             ),
-          ),
-        ],
-      );
+          );
         },
       ),
     );
   }
 
-  Widget _buildFeatureCard(BuildContext context, IconData icon, String title, Color color, VoidCallback onTap) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+  Widget _buildQuickActionCard(BuildContext context, String title, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircleAvatar(
-              backgroundColor: color.withOpacity(0.2),
               radius: 30,
-              child: Icon(icon, size: 30, color: color),
+              backgroundColor: color.withOpacity(0.1),
+              child: Icon(icon, color: color, size: 30),
             ),
             const SizedBox(height: 12),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+

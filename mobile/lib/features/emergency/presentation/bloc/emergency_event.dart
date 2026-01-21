@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/alert.dart';
 
 abstract class EmergencyEvent extends Equatable {
   const EmergencyEvent();
@@ -24,3 +25,12 @@ class CancelSosEvent extends EmergencyEvent {
   @override
   List<Object?> get props => [alertId];
 }
+
+class SosStateChanged extends EmergencyEvent {
+  final Alert alert;
+  const SosStateChanged(this.alert);
+  @override
+  List<Object?> get props => [alert];
+}
+
+class CheckEmergencyStatus extends EmergencyEvent {}

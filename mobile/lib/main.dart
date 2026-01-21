@@ -9,6 +9,7 @@ import 'features/auth/presentation/pages/login_screen.dart';
 import 'features/auth/presentation/pages/registration_screen.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/emergency/presentation/bloc/emergency_bloc.dart';
+import 'features/emergency/presentation/bloc/emergency_event.dart';
 import 'features/emergency/presentation/pages/dashboard_page.dart';
 import 'features/friend_walk/presentation/bloc/friend_walk_bloc.dart';
 import 'features/friend_walk/presentation/pages/friend_walk_page.dart';
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => di.sl<AuthBloc>()..add(CheckAuthStatusEvent())),
-        BlocProvider(create: (_) => di.sl<EmergencyBloc>()),
+        BlocProvider(create: (_) => di.sl<EmergencyBloc>()..add(CheckEmergencyStatus())),
         BlocProvider(create: (_) => di.sl<FriendWalkBloc>()),
         BlocProvider(create: (_) => di.sl<ReportingBloc>()),
         BlocProvider(create: (_) => di.sl<SafetyTimerBloc>()),

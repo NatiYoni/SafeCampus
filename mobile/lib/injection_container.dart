@@ -28,6 +28,7 @@ import 'features/emergency/domain/repositories/emergency_repository.dart';
 import 'features/emergency/domain/usecases/trigger_sos.dart';
 import 'features/emergency/domain/usecases/get_alerts.dart';
 import 'features/emergency/domain/usecases/cancel_sos.dart';
+import 'features/emergency/domain/usecases/get_my_active_alert.dart';
 import 'features/emergency/presentation/bloc/emergency_bloc.dart';
 
 import 'features/friend_walk/data/datasources/friend_walk_remote_data_source.dart';
@@ -108,10 +109,15 @@ Future<void> init() async {
 
   //! Features - Emergency (SOS)
   // Bloc
-  sl.registerFactory(() => EmergencyBloc(triggerSos: sl(), cancelSos: sl()));
+  sl.registerFactory(() => EmergencyBloc(
+        triggerSos: sl(),
+        cancelSos: sl(),
+        getMyActiveAlert: sl(),
+      ));
   // Use cases
   sl.registerLazySingleton(() => TriggerSos(sl()));
   sl.registerLazySingleton(() => CancelSos(sl())); // Added CancelSos
+  sl.registerLazySingleton(() => GetMyActiveAlert(sl()));
   sl.registerLazySingleton(() => GetAlerts(sl()));
   // Repository
   sl.registerLazySingleton<EmergencyRepository>(() => EmergencyRepositoryImpl(remoteDataSource: sl()));
