@@ -6,6 +6,7 @@ class Alert extends Equatable {
   final String id;
   final String userId;
   final String? userName; // Added userName
+  final String? universityId; // Added Univ ID
   final AlertType type;
   final String status;
   final DateTime timestamp;
@@ -16,6 +17,7 @@ class Alert extends Equatable {
     required this.id,
     required this.userId,
     this.userName,
+    this.universityId,
     required this.type,
     required this.status,
     required this.timestamp,
@@ -24,5 +26,5 @@ class Alert extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, userId, userName, type, status, timestamp, latitude, longitude];
+  List<Object?> get props => [id, userId, userName, universityId, type, status, timestamp, latitude, longitude];
 }
