@@ -7,6 +7,7 @@ import (
 	domain "github.com/StartUp/safecampus/backend/Domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type AlertRepository struct {
@@ -90,6 +91,19 @@ func (r *AlertRepository) FetchNearby(ctx context.Context, loc domain.Location, 
 	}
 
 	var alerts []*domain.Alert
+	if err = cursor.All(ctx, &alerts); err != nil {
+		return nil, err
+	}
+	return alerts, nil
+}
+
+func (r *AlertRepository) GetAll(ctx context.Context) ([]*domain.Alert, error) {
+	var alerts []*domain.Alert
+	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
+	cursor, err := r.collection.Find(ctx, bson.M{}, opts)
+	if err != nil {
+		return nil, err
+	}
 	if err = cursor.All(ctx, &alerts); err != nil {
 		return nil, err
 	}

@@ -13,6 +13,7 @@ type AlertUsecase interface {
 	TriggerSOS(ctx context.Context, userID string, location domain.Location) (*domain.Alert, error)
 	UpdateLocation(ctx context.Context, alertID string, location domain.Location) error
 	ResolveAlert(ctx context.Context, alertID string) error
+	GetAllAlerts(ctx context.Context) ([]*domain.Alert, error)
 }
 
 type alertUsecase struct {
@@ -64,4 +65,10 @@ func (a *alertUsecase) ResolveAlert(ctx context.Context, alertID string) error {
 	ctx, cancel := context.WithTimeout(ctx, a.contextTimeout)
 	defer cancel()
 	return a.alertRepo.UpdateStatus(ctx, alertID, "Resolved")
+}
+
+func (a *alertUsecase) GetAllAlerts(ctx context.Context) ([]*domain.Alert, error) {
+	ctx, cancel := context.WithTimeout(ctx, a.contextTimeout)
+	defer cancel()
+	return a.alertRepo.GetAll(ctx)
 }

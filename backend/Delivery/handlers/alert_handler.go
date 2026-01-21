@@ -46,3 +46,12 @@ func (h *AlertHandler) ResolveAlert(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Alert resolved"})
 }
+
+func (h *AlertHandler) GetAllAlerts(c *gin.Context) {
+	alerts, err := h.AlertUsecase.GetAllAlerts(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, alerts)
+}

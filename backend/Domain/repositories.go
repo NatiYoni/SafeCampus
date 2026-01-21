@@ -28,6 +28,7 @@ type AlertRepository interface {
 	Create(ctx context.Context, alert *Alert) error
 	GetByID(ctx context.Context, id string) (*Alert, error)
 	GetActiveByUserID(ctx context.Context, userID string) ([]*Alert, error)
+	GetAll(ctx context.Context) ([]*Alert, error)
 	UpdateStatus(ctx context.Context, id string, status string) error
 	FetchNearby(ctx context.Context, loc Location, radius float64) ([]*Alert, error)
 }
