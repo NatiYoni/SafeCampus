@@ -125,8 +125,10 @@ func (r *AlertRepository) FetchNearby(ctx context.Context, loc domain.Location, 
 
 func (r *AlertRepository) GetAll(ctx context.Context) ([]*domain.Alert, error) {
 	var alerts []*domain.Alert
+	// Filter to only show active alerts in the admin dashboard
+	filter := bson.M{"status": "Active"}
 	opts := options.Find().SetSort(bson.D{{Key: "timestamp", Value: -1}})
-	cursor, err := r.collection.Find(ctx, bson.M{}, opts)
+	cursor, err := r.collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err
 	}
