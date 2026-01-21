@@ -4,4 +4,5 @@ import '../entities/alert.dart';
 
 abstract class EmergencyRepository {
   Future<Either<Failure, Alert>> triggerSos(String userId);
+  Future<Either<Failure, List<Alert>>> getAlerts();
 }

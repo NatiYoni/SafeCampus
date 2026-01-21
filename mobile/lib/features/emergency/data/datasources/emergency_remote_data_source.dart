@@ -5,12 +5,33 @@ import '../../domain/entities/alert.dart';
 
 abstract class EmergencyRemoteDataSource {
   Future<Alert> triggerSos(String userId);
+  Future<List<Alert>> getAlerts();
 }
 
 class EmergencyRemoteDataSourceImpl implements EmergencyRemoteDataSource {
   final Dio client;
 
   EmergencyRemoteDataSourceImpl({required this.client});
+
+  @override
+  Future<List<Alert>> getAlerts() async {
+    final response = await client.get('/api/alerts/sos');
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data ?? [];
+      return data.map((json) => Alert(
+        id: json['id'],
+        userId: json['user_id'],
+        type: AlertType.sos, // Defaulting to SOS for now as it's the main one
+        status: json['status'],
+        timestamp: DateTime.parse(json['timestamp']),
+        latitude: json['location']['latitude'],
+        longitude: json['location']['longitude'],
+      )).toList();
+    } else {
+      throw Exception('Failed to fetch alerts');
+    }
+  }
 
   @override
   Future<Alert> triggerSos(String userId) async {

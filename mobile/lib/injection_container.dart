@@ -24,6 +24,7 @@ import 'features/emergency/data/datasources/emergency_remote_data_source.dart';
 import 'features/emergency/data/repositories/emergency_repository_impl.dart';
 import 'features/emergency/domain/repositories/emergency_repository.dart';
 import 'features/emergency/domain/usecases/trigger_sos.dart';
+import 'features/emergency/domain/usecases/get_alerts.dart';
 import 'features/emergency/presentation/bloc/emergency_bloc.dart';
 
 import 'features/friend_walk/data/datasources/friend_walk_remote_data_source.dart';
@@ -103,6 +104,7 @@ Future<void> init() async {
   sl.registerFactory(() => EmergencyBloc(triggerSos: sl()));
   // Use cases
   sl.registerLazySingleton(() => TriggerSos(sl()));
+  sl.registerLazySingleton(() => GetAlerts(sl()));
   // Repository
   sl.registerLazySingleton<EmergencyRepository>(() => EmergencyRepositoryImpl(remoteDataSource: sl()));
   // Data sources
@@ -135,9 +137,12 @@ Future<void> init() async {
   // Data sources
   sl.registerLazySingleton<ReportingRemoteDataSource>(() => ReportingRemoteDataSourceImpl(client: sl()));
 
+  //! Admin Features
+  sl.registerFactory(() => AdminSosBloc(getAlerts: sl()));
+
   //! Features - Safety Timer
   // Bloc
-  sl.registerFactory(() => SafetyTimerBloc(setTimer: sl(), cancelTimer: sl()));
+  sl.registerFactory(() => SafetyTimerBloc(setTimer: sl(), cancelTimer: sl(), triggerSos: sl()));
   // Use cases
   sl.registerLazySingleton(() => SetTimer(sl()));
   sl.registerLazySingleton(() => CancelTimer(sl()));

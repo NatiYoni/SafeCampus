@@ -25,3 +25,5 @@ class TimerTick extends SafetyTimerEvent {
   @override
   List<Object> get props => [remainingSeconds];
 }
+
+class TimerExpiredEvent extends SafetyTimerEvent {}

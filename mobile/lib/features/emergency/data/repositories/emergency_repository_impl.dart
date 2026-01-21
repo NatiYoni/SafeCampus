@@ -18,4 +18,14 @@ class EmergencyRepositoryImpl implements EmergencyRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<Alert>>> getAlerts() async {
+    try {
+      final alerts = await remoteDataSource.getAlerts();
+      return Right(alerts);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
