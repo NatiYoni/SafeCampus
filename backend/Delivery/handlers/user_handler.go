@@ -205,3 +205,17 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, user)
 }
+
+func (h *UserHandler) FindUserByUniID(c *gin.Context) {
+	uniID := c.Query("university_id")
+	if uniID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "university_id query parameter is required"})
+		return
+	}
+	user, err := h.UserUsecase.GetByUniversityID(c, uniID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}

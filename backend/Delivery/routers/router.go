@@ -34,6 +34,7 @@ func SetupRouter(
 		admin.POST("/invite", userHandler.InviteAdmin)
 		admin.POST("/promote", userHandler.PromoteUser)
 		admin.POST("/register", userHandler.RegisterAdmin)
+		admin.GET("/users/search", userHandler.FindUserByUniID)
 	}
 
 	// Protected routes (Add middleware later)

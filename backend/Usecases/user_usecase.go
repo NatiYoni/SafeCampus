@@ -23,6 +23,7 @@ type UserUsecase interface {
 	GetProfile(ctx context.Context, id string) (*domain.User, error)
 	UpdateProfile(ctx context.Context, user *domain.User) error
 	AddEmergencyContact(ctx context.Context, userID string, contact domain.Contact) error
+	GetByUniversityID(ctx context.Context, uniID string) (*domain.User, error)
 
 	// Admin / RBAC
 	PromoteUser(ctx context.Context, adminID, targetEmail string) error
@@ -270,9 +271,16 @@ func (u *userUsecase) RefreshToken(ctx context.Context, refreshToken string) (st
 	return newAccessToken, nil
 }
 
+func (u *userUsecase) GetByUniversityID(ctx context.Context, uniID string) (*domain.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+	return u.userRepo.GetByUniversityID(ctx, uniID)
+}
+
 func (u *userUsecase) GetProfile(ctx context.Context, id string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()
+
 	return u.userRepo.GetByID(ctx, id)
 }
 

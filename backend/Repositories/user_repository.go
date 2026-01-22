@@ -30,6 +30,19 @@ func (r *UserRepository) GetByID(ctx context.Context, id string) (*domain.User, 
 	err := r.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
+			return nil, nil // Return nil, nil if not found to allow check
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) GetByUniversityID(ctx context.Context, uniID string) (*domain.User, error) {
+	var user domain.User
+	filter := bson.M{"university_id": uniID}
+	err := r.collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("user not found")
 		}
 		return nil, err
