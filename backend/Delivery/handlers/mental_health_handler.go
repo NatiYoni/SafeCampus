@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	domain "github.com/StartUp/safecampus/backend/Domain"
 	usecases "github.com/StartUp/safecampus/backend/Usecases"
 	"github.com/gin-gonic/gin"
 )
@@ -25,3 +26,20 @@ func (h *MentalHealthHandler) GetResources(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, resources)
 }
+
+func (h *MentalHealthHandler) ChatWithCompanion(c *gin.Context) {
+	var req domain.AIChatRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := h.Usecase.GetAICompanionResponse(c, req.Message, req.History)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, domain.AIChatResponse{Response: response})
+}
+
