@@ -19,11 +19,13 @@ class WelcomeScreen extends StatelessWidget {
               const Spacer(),
               // Logo
               Container(
-                height: 150,
+                width: MediaQuery.of(context).size.width * 0.6, // Set width to 60% of screen
+                height: 200, // Increased max height
                 constraints: const BoxConstraints(maxWidth: 400),
+                alignment: Alignment.center,
                 child: Image.asset(
                   'assets/images/logo.png',
-                  fit: BoxFit.contain, // Ensures the logo scales correctly without distortion
+                  fit: BoxFit.contain, 
                   errorBuilder: (context, error, stackTrace) {
                     return Icon(
                       Icons.shield_outlined,
