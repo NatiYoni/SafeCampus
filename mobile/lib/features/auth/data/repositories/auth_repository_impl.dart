@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -15,6 +16,12 @@ class AuthRepositoryImpl implements AuthRepository {
       final user = await remoteDataSource.login(email, password);
       return Right(user);
     } catch (e) {
+      if (e is DioException && e.response?.data != null) {
+        final data = e.response!.data;
+        if (data is Map && data.containsKey('error')) {
+          return Left(ServerFailure(data['error']));
+        }
+      }
       return Left(ServerFailure(e.toString()));
     }
   }
@@ -25,6 +32,12 @@ class AuthRepositoryImpl implements AuthRepository {
       await remoteDataSource.register(email, password, fullName, phoneNumber, universityId);
       return const Right(null);
     } catch (e) {
+      if (e is DioException && e.response?.data != null) {
+        final data = e.response!.data;
+        if (data is Map && data.containsKey('error')) {
+          return Left(ServerFailure(data['error']));
+        }
+      }
       return Left(ServerFailure(e.toString()));
     }
   }
@@ -35,6 +48,12 @@ class AuthRepositoryImpl implements AuthRepository {
       await remoteDataSource.verifyEmail(email, code);
       return const Right(null);
     } catch (e) {
+      if (e is DioException && e.response?.data != null) {
+        final data = e.response!.data;
+        if (data is Map && data.containsKey('error')) {
+          return Left(ServerFailure(data['error']));
+        }
+      }
       return Left(ServerFailure(e.toString()));
     }
   }
@@ -45,6 +64,12 @@ class AuthRepositoryImpl implements AuthRepository {
       await remoteDataSource.resendVerification(email);
       return const Right(null);
     } catch (e) {
+      if (e is DioException && e.response?.data != null) {
+        final data = e.response!.data;
+        if (data is Map && data.containsKey('error')) {
+          return Left(ServerFailure(data['error']));
+        }
+      }
       return Left(ServerFailure(e.toString()));
     }
   }
