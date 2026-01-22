@@ -10,6 +10,8 @@ abstract class AuthRemoteDataSource {
   Future<void> resendVerification(String email);
   Future<void> logout();
   Future<UserModel?> getLastUser();
+  Future<UserModel> updateProfile(UserModel user);
+  Future<void> changePassword(String oldPassword, String newPassword);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -106,5 +108,36 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
     }
     return null;
+  }
+
+  @override
+  Future<UserModel> updateProfile(UserModel user) async {
+    final response = await client.put(
+      '/api/profile',
+      data: user.toJson(),
+    );
+
+    if (response.statusCode == 200) {
+      final updatedUser = UserModel.fromJson(response.data['user']);
+      await secureStorage.write(key: 'user', value: jsonEncode(updatedUser.toJson()));
+      return updatedUser;
+    } else {
+      throw Exception('Failed to update profile');
+    }
+  }
+
+  @override
+  Future<void> changePassword(String oldPassword, String newPassword) async {
+    final response = await client.post(
+      '/api/profile/change-password',
+      data: {
+        "old_password": oldPassword,
+        "new_password": newPassword,
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to change password');
+    }
   }
 }
