@@ -207,6 +207,60 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+func (h *UserHandler) UpdateProfile(c *gin.Context) {
+	id := c.GetString("user_id") // Get from Middleware
+	if id == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var req domain.User
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Fetch existing user to ensure we don't overwrite read-only fields or password
+	existingUser, err := h.UserUsecase.GetProfile(c, id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Update allowed fields
+	existingUser.FullName = req.FullName
+	existingUser.PhoneNumber = req.PhoneNumber
+	existingUser.Profile = req.Profile // Medical info
+    // UniversityID, Email, Role should probably not be changeable here directly for security without verification
+
+	if err := h.UserUsecase.UpdateProfile(c, existingUser); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Profile updated successfully", "user": existingUser})
+}
+
+func (h *UserHandler) ChangePassword(c *gin.Context) {
+	id := c.GetString("user_id")
+	var req struct {
+		OldPassword string `json:"old_password" binding:"required"`
+		NewPassword string `json:"new_password" binding:"required,min=6"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.UserUsecase.ChangePassword(c, id, req.OldPassword, req.NewPassword); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
+}
+
 func (h *UserHandler) FindUserByUniID(c *gin.Context) {
 	uniID := c.Query("university_id")
 	if uniID == "" {
