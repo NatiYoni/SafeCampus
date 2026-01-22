@@ -18,4 +18,18 @@ type MentalHealthResource struct {
 	Thumbnail   string       `json:"thumbnail,omitempty" bson:"thumbnail,omitempty"`
 }
 
+type AIChatRequest struct {
+	Message string          `json:"message"`
+	History []AIChatMessage `json:"history,omitempty"`
+}
+
+type AIChatMessage struct {
+	Role    string `json:"role"` // "user" or "model"
+	Content string `json:"content"`
+}
+
+type AIChatResponse struct {
+	Response string `json:"response"`
+}
+
 // MentalHealthRepository is defined in repositories.go
