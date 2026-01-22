@@ -73,7 +73,6 @@ func (h *UserHandler) InviteAdmin(c *gin.Context) {
 }
 
 type PromoteRequest struct {
-	AdminID     string `json:"admin_id" binding:"required"` // Authenticated Admin ID
 	TargetEmail string `json:"target_email" binding:"required,email"`
 }
 
@@ -84,7 +83,9 @@ func (h *UserHandler) PromoteUser(c *gin.Context) {
 		return
 	}
 
-	err := h.UserUsecase.PromoteUser(c, req.AdminID, req.TargetEmail)
+	adminID := c.GetString("user_id")
+
+	err := h.UserUsecase.PromoteUser(c, adminID, req.TargetEmail)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -7,6 +7,7 @@ import 'dart:async';
 import '../bloc/emergency_bloc.dart';
 import '../bloc/emergency_event.dart';
 import '../bloc/emergency_state.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -244,11 +245,18 @@ class _DashboardPageState extends State<DashboardPage> {
                        ],
                      ),
                      const SizedBox(height: 20),
-                     // Temporary Admin Access for Demo
-                     TextButton.icon(
-                        onPressed: () => context.push('/admin'),
-                        icon: const Icon(Icons.admin_panel_settings),
-                        label: const Text("Go to Admin Console"),
+                     // Admin Access (Admin/Super Admin only)
+                     BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, authState) {
+                          if (authState is AuthAuthenticated && authState.user.role != 'student') {
+                             return TextButton.icon(
+                                onPressed: () => context.push('/admin'),
+                                icon: const Icon(Icons.admin_panel_settings),
+                                label: const Text("Go to Admin Console"),
+                             );
+                          }
+                          return const SizedBox.shrink();
+                        },
                      ),
                 ],
               ),

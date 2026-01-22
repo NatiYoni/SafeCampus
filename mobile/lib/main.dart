@@ -130,6 +130,9 @@ final GoRouter _router = GoRouter(
     if(isWelcome || isLoggingIn || isRegistering || isVerifying) {
        // but if authenticated, go to dashboard
        if (authState is AuthAuthenticated) {
+          if (authState.user.role == 'super_admin') {
+            return '/admin';
+          }
           return '/dashboard';
        }
        return null;
@@ -140,6 +143,23 @@ final GoRouter _router = GoRouter(
         // If not authenticated, always go to welcome (or login)
         return '/';
     }
+
+    // Access Control Logic
+    final userRole = authState.user.role;
+    final isOnAdminRoute = state.uri.toString().startsWith('/admin');
+
+    // 1. Super Admin: forced to /admin if trying to access other routes (User Dashboard)
+    // Assuming Super Admin strictly works on Admin Console.
+    if (userRole == 'super_admin' && !isOnAdminRoute) {
+      return '/admin';
+    }
+
+    // 2. Student: banned from /admin routes
+    if (userRole == 'student' && isOnAdminRoute) {
+      return '/dashboard';
+    }
+
+    // 3. Admin (Promoted Student): Allowed everywhere. No redirect needed.
 
     return null;
   },

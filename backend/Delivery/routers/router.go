@@ -30,11 +30,17 @@ func SetupRouter(
 
 	// Admin routes
 	admin := r.Group("/admin")
+	
+	// Public Admin Routes (e.g. consuming an invite)
+	admin.POST("/register", userHandler.RegisterAdmin)
+
+	// Protected Admin Routes
+	adminProtected := admin.Group("/")
+	adminProtected.Use(middleware.AuthMiddleware(jwtService))
 	{
-		admin.POST("/invite", userHandler.InviteAdmin)
-		admin.POST("/promote", userHandler.PromoteUser)
-		admin.POST("/register", userHandler.RegisterAdmin)
-		admin.GET("/users/search", userHandler.FindUserByUniID)
+		adminProtected.POST("/invite", userHandler.InviteAdmin)
+		adminProtected.POST("/promote", userHandler.PromoteUser)
+		adminProtected.GET("/users/search", userHandler.FindUserByUniID)
 	}
 
 	// Protected routes (Add middleware later)

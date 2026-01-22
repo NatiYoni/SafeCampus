@@ -20,41 +20,8 @@ import (
 )
 
 func seedAdminUser(db *mongo.Database) {
-	email := "admin@safecampus.com"
-	password := "admin123"
-
-	collection := db.Collection("users")
-
-	// Check if admin exists
-	var existing domain.User
-	err := collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&existing)
-	if err == nil {
-		log.Println("✅ Admin account already exists.")
-		return
-	}
-
-	// Create Admin
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
-	admin := domain.User{
-		ID:           uuid.New().String(),
-		Email:        email,
-		PasswordHash: string(hashedPassword),
-		FullName:     "System Administrator",
-		Role:         domain.RoleSuperAdmin,
-		IsVerified:   true,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
-	}
-
-	_, err = collection.InsertOne(context.TODO(), admin)
-	if err != nil {
-		log.Printf("❌ Failed to seed admin: %v\n", err)
-	} else {
-		log.Println("🚀 Admin account created successfully!")
-		log.Printf("📧 Email: %s\n", email)
-		log.Printf("🔑 Password: %s\n", password)
-	}
+	// Functionality removed for security
+	return
 }
 
 func main() {
@@ -78,8 +45,8 @@ func main() {
 	// Use the "safecampus" database
 	db := client.Database("safecampus")
 
-	// 1.5 Seed Admin User (Added)
-	seedAdminUser(db)
+	// 1.5 Seed Admin User (Removed)
+	// seedAdminUser(db)
 
 	// 2. Initialize Repositories
 	userRepo := repositories.NewUserRepository(db)
