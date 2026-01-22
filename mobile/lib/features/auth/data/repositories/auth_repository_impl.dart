@@ -4,6 +4,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
+import '../models/user_model.dart'; // Import UserModel and ProfileModel
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -96,4 +97,59 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(CacheFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, User>> updateProfile(User user) async {
+    try {
+      // Convert User.Profile to ProfileModel
+      ProfileModel? profileModel;
+      if (user.profile != null) {
+        profileModel = ProfileModel(
+          bloodType: user.profile!.bloodType,
+          allergies: user.profile!.allergies,
+          medicalConditions: user.profile!.medicalConditions,
+          medications: user.profile!.medications,
+        );
+      }
+
+      // Cast base User to UserModel
+      final userModel = UserModel(
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        phoneNumber: user.phoneNumber,
+        universityId: user.universityId,
+        isVerified: user.isVerified,
+        role: user.role,
+        profile: profileModel,
+      );
+      final updatedUser = await remoteDataSource.updateProfile(userModel);
+      return Right(updatedUser);
+    } catch (e) {
+      if (e is DioException && e.response?.data != null) {
+         final data = e.response!.data;
+         if (data is Map && data.containsKey('error')) {
+           return Left(ServerFailure(data['error']));
+         }
+      }
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> changePassword(String oldPassword, String newPassword) async {
+    try {
+      await remoteDataSource.changePassword(oldPassword, newPassword);
+      return const Right(null);
+    } catch (e) {
+      if (e is DioException && e.response?.data != null) {
+         final data = e.response!.data;
+         if (data is Map && data.containsKey('error')) {
+           return Left(ServerFailure(data['error']));
+         }
+      }
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
+
