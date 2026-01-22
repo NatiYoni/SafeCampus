@@ -141,7 +141,8 @@ func (u *mentalHealthUsecase) GetAICompanionResponse(ctx context.Context, messag
 		return "I apologize, but I am currently offline. Please contact support.", nil
 	}
 
-	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey
+	// URI: Use gemini-pro (v1.0) which is widely available, avoiding 404s on some keys/regions for 1.5-flash
+	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey
 
 	// Construct request body for Gemini
 	type GeminiPart struct {
@@ -151,26 +152,40 @@ func (u *mentalHealthUsecase) GetAICompanionResponse(ctx context.Context, messag
 		Role  string       `json:"role"`
 		Parts []GeminiPart `json:"parts"`
 	}
+	// Note: We removed SystemInstruction field as it causes 500/400 errors on gemini-pro v1beta
 	type GeminiRequest struct {
-		Contents          []GeminiContent `json:"contents"`
-		SystemInstruction *GeminiContent  `json:"systemInstruction,omitempty"`
+		Contents []GeminiContent `json:"contents"`
 	}
 
 	var contents []GeminiContent
 
-	// Convert history
+	// 1. Inject System Prompt as the first User message (Manual Prompt Engineering)
+	// This ensures compatibility with models that don't support the 'system_instruction' field.
+	contents = append(contents, GeminiContent{
+		Role:  "user",
+		Parts: []GeminiPart{{Text: systemPrompt}},
+	})
+	// 2. Inject a Mock Model acknowledgment to keep the conversation flow valid (User -> Model -> User...)
+	contents = append(contents, GeminiContent{
+		Role:  "model",
+		Parts: []GeminiPart{{Text: "I understand. I am the SafeCampus Mental Health Companion. I will follow all privacy and safety guidelines."}},
+	})
+
+	// 3. Append Conversation History
 	for _, msg := range history {
 		role := "user"
 		if msg.Role == "model" {
 			role = "model"
 		}
+		// Basic sanitization: ensure model/user turns alternate if needed, 
+		// but Gemini API is usually forgiving if we list valid sequence.
 		contents = append(contents, GeminiContent{
 			Role:  role,
 			Parts: []GeminiPart{{Text: msg.Content}},
 		})
 	}
 
-	// Append current message
+	// 4. Append Current User Message
 	contents = append(contents, GeminiContent{
 		Role:  "user",
 		Parts: []GeminiPart{{Text: message}},
@@ -178,12 +193,6 @@ func (u *mentalHealthUsecase) GetAICompanionResponse(ctx context.Context, messag
 
 	reqBody := GeminiRequest{
 		Contents: contents,
-		SystemInstruction: &GeminiContent{
-			Role: "user", // System instructions are passed as 'user' role or specific field in v1beta depending on model version, but "parts" wrapper is key. strictly speaking v1beta uses system_instruction or just a first prompt.
-			// Simpler approach for v1beta: Prepend system prompt to the first message or use the dedicated field if supported directly.
-			// Let's use the explicit field which is supported in newer Gemini versions.
-			Parts: []GeminiPart{{Text: systemPrompt}},
-		},
 	}
 
 	jsonData, _ := json.Marshal(reqBody)
