@@ -20,14 +20,16 @@ class AdminReportsPage extends StatelessWidget {
             if (state is ReportingLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is ReportsLoaded) {
-              if (state.reports.isEmpty) {
+              final activeReports = state.reports.where((r) => r.status != 'Resolved').toList();
+              
+              if (activeReports.isEmpty) {
                 return const Center(child: Text("No active reports found."));
               }
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: state.reports.length,
+                itemCount: activeReports.length,
                 itemBuilder: (context, index) {
-                  final report = state.reports[index];
+                  final report = activeReports[index];
                   return Card(
                     elevation: 2,
                     margin: const EdgeInsets.only(bottom: 12),
@@ -55,13 +57,16 @@ class AdminReportsPage extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              Chip(
-                                label: Text(report.status, style: const TextStyle(fontSize: 10)),
-                                backgroundColor: report.status == "Reviewed" 
-                                    ? Colors.green[100] 
-                                    : Colors.amber[100],
-                                visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.zero,
+                              ElevatedButton(
+                                onPressed: () {
+                                  context.read<ReportingBloc>().add(ResolveReportRequested(report.id));
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                                  minimumSize: const Size(0, 24),
+                                ),
+                                child: const Text("Mark Resolved", style: TextStyle(fontSize: 10)),
                               ),
                             ],
                           ),
