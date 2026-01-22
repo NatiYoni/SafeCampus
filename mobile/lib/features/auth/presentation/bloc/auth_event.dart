@@ -32,6 +32,21 @@ class RegisterEvent extends AuthEvent {
   List<Object> get props => [email, password, fullName, phoneNumber, universityId];
 }
 
+class UpdateProfileEvent extends AuthEvent {
+  final User user;
+  const UpdateProfileEvent(this.user);
+    @override
+  List<Object> get props => [user];
+}
+
+class ChangePasswordEvent extends AuthEvent {
+  final String oldPassword;
+  final String newPassword;
+  const ChangePasswordEvent(this.oldPassword, this.newPassword);
+    @override
+  List<Object> get props => [oldPassword, newPassword];
+}
+
 class VerifyEmailEvent extends AuthEvent {
   final String email;
   final String code;
