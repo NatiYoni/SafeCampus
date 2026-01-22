@@ -8,15 +8,11 @@ import (
 
 	"github.com/StartUp/safecampus/backend/Delivery/handlers"
 	"github.com/StartUp/safecampus/backend/Delivery/routers"
-	domain "github.com/StartUp/safecampus/backend/Domain"
 	infrastructure "github.com/StartUp/safecampus/backend/Infrastructure"
 	repositories "github.com/StartUp/safecampus/backend/Repositories"
 	usecases "github.com/StartUp/safecampus/backend/Usecases"
-	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func seedAdminUser(db *mongo.Database) {
