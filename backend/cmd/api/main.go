@@ -65,6 +65,7 @@ func main() {
 	campusRepo := repositories.NewCampusRepository(db) // Added CampusRepo
 	timerRepo := repositories.NewSafetyTimerRepository(db)
 	mentalRepo := repositories.NewMentalHealthRepository(db)
+	articleRepo := repositories.NewArticleRepository(db)
 
 	// 2.5 Initialize Infrastructure Services
 	emailService := infrastructure.NewEmailService()
@@ -83,6 +84,7 @@ func main() {
 	campusUsecase := usecases.NewCampusUseCase(campusRepo) // Added CampusUseCase, no timeout passed in constructor logic provided earlier
 	timerUsecase := usecases.NewSafetyTimerUsecase(timerRepo, timeout)
 	mentalUsecase := usecases.NewMentalHealthUsecase(mentalRepo, timeout)
+	articleUsecase := usecases.NewArticleUsecase(articleRepo, userRepo, timeout)
 
 	// 4. Initialize Handlers
 	userHandler := handlers.NewUserHandler(userUsecase)
@@ -94,9 +96,10 @@ func main() {
 	campusHandler := handlers.NewCampusHandler(campusUsecase) // Added CampusHandler
 	timerHandler := handlers.NewSafetyTimerHandler(timerUsecase)
 	mentalHandler := handlers.NewMentalHealthHandler(mentalUsecase)
+	articleHandler := handlers.NewArticleHandler(articleUsecase)
 
 	// 5. Setup Router
-	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler, walkHandler, timerHandler, mentalHandler, campusHandler, jwtService)
+	r := routers.SetupRouter(userHandler, alertHandler, reportHandler, chatHandler, zoneHandler, walkHandler, timerHandler, mentalHandler, campusHandler, articleHandler, jwtService)
 
 	// 6. Run Server
 	port := os.Getenv("PORT")

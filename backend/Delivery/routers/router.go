@@ -17,6 +17,7 @@ func SetupRouter(
 	timerHandler *handlers.SafetyTimerHandler,
 	mentalHandler *handlers.MentalHealthHandler,
 	campusHandler *handlers.CampusHandler,
+	articleHandler *handlers.ArticleHandler,
 	jwtService *infrastructure.JWTService,
 ) *gin.Engine {
 	r := gin.Default()
@@ -40,6 +41,7 @@ func SetupRouter(
 	{
 		adminProtected.POST("/invite", userHandler.InviteAdmin)
 		adminProtected.POST("/promote", userHandler.PromoteUser)
+		adminProtected.POST("/articles", articleHandler.CreateArticle) // New Article Route
 		adminProtected.GET("/users/search", userHandler.FindUserByUniID)
 	}
 
@@ -47,6 +49,9 @@ func SetupRouter(
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware(jwtService))
 	{
+		// Articles (Public/Student view)
+		api.GET("/articles", articleHandler.GetArticles)
+
 		// Alert / SOS routes
 		api.POST("/alerts/sos", alertHandler.TriggerSOS)
 		api.GET("/alerts/sos", alertHandler.GetAllAlerts)
