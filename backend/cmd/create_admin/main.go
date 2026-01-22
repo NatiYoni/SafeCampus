@@ -48,8 +48,8 @@ func main() {
 
 	// 3. Define Admin Credentials
 	// You can change these logic to valid random emails if needed
-	email := "superadmin_" + generateRandomString(4) + "@safecampus.com"
-	password := generateRandomString(12) // Strong random password
+	email := "superadmin@safecampus.com"
+	password := "SafeCampusSuperAdmin2026!" 
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
