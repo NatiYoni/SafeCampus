@@ -14,11 +14,8 @@ class AdminDashboardPage extends StatelessWidget {
         title: const Text('Admin Console'),
         backgroundColor: Colors.blueGrey[900],
         foregroundColor: Colors.white,
+        automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => context.push('/settings'),
-          ),
           IconButton(
             icon: const Icon(Icons.exit_to_app),
             onPressed: () {
@@ -82,6 +79,13 @@ class AdminDashboardPage extends StatelessWidget {
                     'Manage Staff',
                     Colors.blue,
                     () => context.push('/admin/staff'),
+                  ),
+                  _buildFeatureCard(
+                    context,
+                    Icons.article,
+                    'Publish News',
+                    Colors.purple,
+                    () => context.push('/articles'),
                   ),
                 ],
               ),

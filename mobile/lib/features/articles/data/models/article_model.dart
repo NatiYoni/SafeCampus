@@ -11,11 +11,13 @@ class ArticleModel extends Article {
 
   factory ArticleModel.fromJson(Map<String, dynamic> json) {
     return ArticleModel(
-      id: json['id'],
-      title: json['title'],
-      content: json['content'],
-      authorName: json['author_name'],
-      createdAt: DateTime.parse(json['created_at']),
+      id: json['id'] ?? '',
+      title: json['title'] ?? 'No Title',
+      content: json['content'] ?? '',
+      authorName: json['author_name'] ?? 'Unknown Author',
+      createdAt: json['created_at'] != null 
+          ? DateTime.parse(json['created_at']) 
+          : DateTime.now(),
     );
   }
 }

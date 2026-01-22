@@ -59,7 +59,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/'),
         ),
       ),
       body: BlocConsumer<AuthBloc, AuthState>(

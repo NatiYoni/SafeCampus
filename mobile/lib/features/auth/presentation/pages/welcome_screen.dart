@@ -18,16 +18,20 @@ class WelcomeScreen extends StatelessWidget {
             children: [
               const Spacer(),
               // Logo
-              Image.asset(
-                'assets/images/logo.png',
+              Container(
                 height: 150,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(
-                    Icons.shield_outlined,
-                    size: 150,
-                    color: Theme.of(context).primaryColor,
-                  );
-                },
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain, // Ensures the logo scales correctly without distortion
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.shield_outlined,
+                      size: 100,
+                      color: Theme.of(context).primaryColor,
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 24),
               Text(

@@ -14,15 +14,17 @@ class ArticlesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<ArticleBloc>()..add(FetchArticlesRequested()),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Campus News'),
-        ),
-        body: BlocBuilder<ArticleBloc, ArticleState>(
-          builder: (context, state) {
-            if (state is ArticleLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is ArticlesLoaded) {
+      child: Builder( // Added Builder to ensure context has ArticleBloc
+          builder: (context) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Campus News'),
+              ),
+              body: BlocBuilder<ArticleBloc, ArticleState>(
+                builder: (context, state) {
+                  if (state is ArticleInitial || state is ArticleLoading) { // Handle Initial
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is ArticlesLoaded) {
               if (state.articles.isEmpty) {
                  return const Center(child: Text("No articles found."));
               }
@@ -53,12 +55,8 @@ class ArticlesPage extends StatelessWidget {
         ),
         floatingActionButton: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
-            if (state is AuthAuthenticated && state.user.role == 'admin') {
-              // We need access to the ArticleBloc to refresh the list after popping
-              // But ArticleBloc is provided effectively to the Scaffold's body context.
-              // To use it here, we might need a Builder or access it via `context.read<ArticleBloc>()` 
-              // BUT `floatingActionButton` is outside the `BlocProvider` scope if defined like above? 
-              // Wait, `BlocProvider` wraps `Scaffold`. So `floatingActionButton` IS in scope.
+            // Allow both 'admin' and 'super_admin' to see the create button
+            if (state is AuthAuthenticated && (state.user.role == 'admin' || state.user.role == 'super_admin')) {
               return FloatingActionButton(
                 onPressed: () async {
                   // We can pass the bloc to the next page, or just await result
@@ -79,6 +77,8 @@ class ArticlesPage extends StatelessWidget {
             return const SizedBox.shrink();
           },
         ),
+       );
+      }
       ),
     );
   }

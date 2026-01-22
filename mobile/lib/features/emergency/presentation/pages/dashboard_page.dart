@@ -243,10 +243,10 @@ class _DashboardPageState extends State<DashboardPage> {
                          ),
                          _buildQuickActionCard(
                            context,
-                           'Mental Health',
-                           Icons.favorite,
+                           'AI Companion for Mental Health',
+                           Icons.chat_bubble_outline,
                            Colors.teal,
-                           () => context.push('/mental-health'),
+                           () => context.push('/mental-health/chat'),
                          ),
                          _buildQuickActionCard(
                            context,
