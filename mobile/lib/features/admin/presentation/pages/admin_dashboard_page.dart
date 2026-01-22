@@ -16,6 +16,10 @@ class AdminDashboardPage extends StatelessWidget {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.push('/settings'),
+          ),
+          IconButton(
             icon: const Icon(Icons.exit_to_app),
             onPressed: () {
               final authBloc = context.read<AuthBloc>();
