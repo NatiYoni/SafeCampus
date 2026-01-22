@@ -43,7 +43,7 @@ class ReportingBloc extends Bloc<ReportingEvent, ReportingState> {
       emit(ReportingLoading());
       final result = await resolveReport(event.reportId);
       result.fold(
-        (failure) => emit(ReportingError(message: failure.message)),
+        (failure) => emit(ReportingError(failure.message)),
         (_) => add(FetchReportsRequested()), // Refresh
       );
     });  }
