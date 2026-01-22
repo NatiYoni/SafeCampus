@@ -28,6 +28,8 @@ import 'features/admin/presentation/pages/admin_sos_page.dart';
 import 'features/admin/presentation/pages/admin_reports_page.dart';
 import 'features/admin/presentation/pages/admin_walks_page.dart';
 import 'features/admin/presentation/pages/admin_staff_page.dart';
+import 'features/articles/presentation/pages/articles_page.dart';
+import 'features/auth/presentation/pages/settings_page.dart'; // Import
 import 'injection_container.dart' as di;
 import 'core/go_router_refresh_stream.dart';
 
@@ -168,6 +170,14 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/dashboard',
       builder: (context, state) => const DashboardPage(),
+    ),
+    GoRoute(
+      path: '/articles',
+      builder: (context, state) => const ArticlesPage(),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsPage(),
     ),
     GoRoute(
       path: '/',
