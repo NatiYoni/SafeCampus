@@ -141,7 +141,9 @@ func (u *mentalHealthUsecase) GetAICompanionResponse(ctx context.Context, messag
 		return "I apologize, but I am currently offline. Please contact support.", nil
 	}
 
-	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey
+	// Using 'gemini-2.5-flash' as it is the newest stable version available
+	targetModel := "gemini-2.5-flash"
+	url := "https://generativelanguage.googleapis.com/v1beta/models/" + targetModel + ":generateContent?key=" + apiKey
 
 	// Construct request body for Gemini
 	type GeminiPart struct {
@@ -202,21 +204,7 @@ func (u *mentalHealthUsecase) GetAICompanionResponse(ctx context.Context, messag
 
 	if resp.StatusCode != 200 {
 		bodyBytes, _ := io.ReadAll(resp.Body)
-		errorMsg := fmt.Sprintf("AI API error (status %d): %s", resp.StatusCode, string(bodyBytes))
-
-		// DIAGNOSTIC: If 404, check which models are actually available for this key
-		if resp.StatusCode == 404 {
-			listUrl := "https://generativelanguage.googleapis.com/v1beta/models?key=" + apiKey
-			listResp, listErr := http.Get(listUrl)
-			if listErr == nil {
-				defer listResp.Body.Close()
-				listBytes, _ := io.ReadAll(listResp.Body)
-				errorMsg += fmt.Sprintf("\n[DIAGNOSTIC] Available Models: %s", string(listBytes))
-			}
-		}
-
-		fmt.Println(errorMsg)
-		return "", fmt.Errorf(errorMsg)
+		return "", fmt.Errorf("AI API error (status %d): %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	// Parse Response
