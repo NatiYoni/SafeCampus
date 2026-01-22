@@ -13,6 +13,8 @@ import 'features/auth/domain/usecases/register.dart';
 import 'features/auth/domain/usecases/resend_verification.dart';
 import 'features/auth/domain/usecases/verify_email.dart';
 import 'features/auth/domain/usecases/check_auth_status.dart';
+import 'features/auth/domain/usecases/update_profile.dart'; // Add
+import 'features/auth/domain/usecases/change_password.dart'; // Add
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
 import 'features/chat/data/datasources/chat_remote_data_source.dart';
@@ -73,6 +75,13 @@ import 'features/safety_timer/domain/usecases/cancel_timer.dart';
 import 'features/safety_timer/domain/usecases/set_timer.dart';
 import 'features/safety_timer/presentation/bloc/safety_timer_bloc.dart';
 
+import 'features/articles/data/datasources/article_remote_data_source.dart';
+import 'features/articles/data/repositories/article_repository_impl.dart';
+import 'features/articles/domain/repositories/article_repository.dart';
+import 'features/articles/domain/usecases/get_articles.dart';
+import 'features/articles/domain/usecases/create_article.dart';
+import 'features/articles/presentation/bloc/article_bloc.dart';
+
 
 final sl = GetIt.instance;
 
@@ -87,6 +96,8 @@ Future<void> init() async {
       resendVerification: sl(),
       logout: sl(),
       checkAuthStatus: sl(),
+      updateProfile: sl(), // Add
+      changePassword: sl(), // Add
       sessionExpiredStream: sl<AuthInterceptor>().onSessionExpired,
     ),
   );
@@ -98,6 +109,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ResendVerification(sl()));
   sl.registerLazySingleton(() => Logout(sl()));
   sl.registerLazySingleton(() => CheckAuthStatus(sl()));
+  sl.registerLazySingleton(() => UpdateProfile(sl())); // Add
+  sl.registerLazySingleton(() => ChangePassword(sl())); // Add
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(
@@ -208,6 +221,24 @@ Future<void> init() async {
   sl.registerLazySingleton<MentalHealthRepository>(() => MentalHealthRepositoryImpl(remoteDataSource: sl()));
   // Data sources
   sl.registerLazySingleton<MentalHealthRemoteDataSource>(() => MentalHealthRemoteDataSourceImpl(client: sl()));
+
+  //! Features - Articles
+  // Bloc
+  sl.registerFactory(() => ArticleBloc(
+        getArticles: sl(),
+        createArticle: sl(),
+      ));
+  // Use cases
+  sl.registerLazySingleton(() => GetArticles(sl()));
+  sl.registerLazySingleton(() => CreateArticle(sl()));
+  // Repository
+  sl.registerLazySingleton<ArticleRepository>(
+    () => ArticleRepositoryImpl(remoteDataSource: sl()),
+  );
+  // Data sources
+  sl.registerLazySingleton<ArticleRemoteDataSource>(
+    () => ArticleRemoteDataSourceImpl(client: sl()),
+  );
 
   //! Core
   // Secure Storage
