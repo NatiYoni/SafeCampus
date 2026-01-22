@@ -30,7 +30,7 @@ func SetupRouter(
 
 	// Admin routes
 	admin := r.Group("/admin")
-	
+
 	// Public Admin Routes (e.g. consuming an invite)
 	admin.POST("/register", userHandler.RegisterAdmin)
 
@@ -56,6 +56,7 @@ func SetupRouter(
 		// Report routes
 		api.POST("/reports", reportHandler.SubmitReport)
 		api.GET("/reports", reportHandler.GetReports)
+		api.PUT("/reports/:id/resolve", reportHandler.ResolveReport)
 
 		// Chat routes
 		api.POST("/chats/messages", chatHandler.SendMessage)
@@ -83,7 +84,6 @@ func SetupRouter(
 		api.POST("/campus/heartbeat", campusHandler.Heartbeat)
 		api.GET("/campus/status", campusHandler.GetCampusStatus)
 	}
-
 
 	return r
 }
