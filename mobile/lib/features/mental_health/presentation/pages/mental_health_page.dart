@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../bloc/mental_health_bloc.dart';
 import '../bloc/mental_health_event.dart';
@@ -25,7 +26,16 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Mental Health Resources')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          context.push('/mental-health/chat');
+        },
+        icon: const Icon(Icons.support_agent),
+        label: const Text('AI Companion'),
+        backgroundColor: Colors.teal,
+      ),
       body: BlocBuilder<MentalHealthBloc, MentalHealthState>(
+
         builder: (context, state) {
           if (state is MentalHealthLoading) {
             return const Center(child: CircularProgressIndicator());
