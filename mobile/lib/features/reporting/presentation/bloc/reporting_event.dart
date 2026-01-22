@@ -25,3 +25,12 @@ class SubmitReportRequested extends ReportingEvent {
 }
 
 class FetchReportsRequested extends ReportingEvent {}
+
+class ResolveReportRequested extends ReportingEvent {
+  final String reportId;
+
+  const ResolveReportRequested(this.reportId);
+
+  @override
+  List<Object> get props => [reportId];
+}
