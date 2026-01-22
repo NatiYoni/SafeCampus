@@ -53,3 +53,17 @@ func (h *ReportHandler) GetReports(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, reports)
 }
+
+func (h *ReportHandler) ResolveReport(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
+		return
+	}
+
+	if err := h.ReportUsecase.ResolveReport(c, id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Report resolved"})
+}
