@@ -58,3 +58,10 @@ func (r *ReportRepository) FetchAll(ctx context.Context, filterMap map[string]in
 	}
 	return reports, nil
 }
+
+func (r *ReportRepository) UpdateStatus(ctx context.Context, id string, status string) error {
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": bson.M{"status": status}}
+	_, err := r.collection.UpdateOne(ctx, filter, update)
+	return err
+}
