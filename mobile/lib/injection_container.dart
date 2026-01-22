@@ -62,6 +62,7 @@ import 'features/reporting/data/repositories/reporting_repository_impl.dart';
 import 'features/reporting/domain/repositories/reporting_repository.dart';
 import 'features/reporting/domain/usecases/submit_report.dart';
 import 'features/reporting/domain/usecases/get_reports.dart';
+import 'features/reporting/domain/usecases/resolve_report.dart';
 import 'features/reporting/presentation/bloc/reporting_bloc.dart';
 
 import 'features/admin/presentation/bloc/admin_sos_bloc.dart';
@@ -171,10 +172,11 @@ Future<void> init() async {
 
   //! Features - Reporting
   // Bloc
-  sl.registerFactory(() => ReportingBloc(submitReport: sl(), getReports: sl()));
+  sl.registerFactory(() => ReportingBloc(submitReport: sl(), getReports: sl(), resolveReport: sl()));
   // Use cases
   sl.registerLazySingleton(() => SubmitReport(sl()));
   sl.registerLazySingleton(() => GetReports(sl()));
+  sl.registerLazySingleton(() => ResolveReport(sl()));
   // Repository
   sl.registerLazySingleton<ReportingRepository>(() => ReportingRepositoryImpl(remoteDataSource: sl()));
   // Data sources
