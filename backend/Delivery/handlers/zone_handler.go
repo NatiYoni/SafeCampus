@@ -40,3 +40,13 @@ func (h *ZoneHandler) CheckZone(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"in_zone": false})
 	}
 }
+
+func (h *ZoneHandler) GetAllZones(c *gin.Context) {
+	zones, err := h.ZoneUsecase.GetAllZones(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, zones)
+}
+
