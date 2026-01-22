@@ -21,4 +21,24 @@ class MentalHealthRepositoryImpl implements MentalHealthRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> sendChatToCompanion(String message, List<Map<String, String>> history) async {
+    try {
+      final response = await remoteDataSource.sendMessage(message, history);
+      return Right(response);
+    } on DioException catch (e) {
+      // Extract specific error message from backend if available
+      if (e.response != null && e.response?.data != null && e.response?.data is Map) {
+        final Map<String, dynamic> data = e.response!.data as Map<String, dynamic>;
+        if (data.containsKey('error')) {
+          return Left(ServerFailure(data['error']));
+        }
+      }
+      return Left(ServerFailure(e.message ?? 'Unknown Server Error'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
+
