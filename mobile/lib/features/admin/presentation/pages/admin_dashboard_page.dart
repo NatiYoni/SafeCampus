@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
+
 
 class AdminDashboardPage extends StatelessWidget {
   const AdminDashboardPage({super.key});
@@ -13,10 +16,21 @@ class AdminDashboardPage extends StatelessWidget {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.exit_to_app),
             onPressed: () {
-              // TODO: Calls AuthBloc Logout
-              context.go('/login');
+              final authBloc = context.read<AuthBloc>();
+              final state = authBloc.state;
+              if (state is AuthAuthenticated) {
+                if (state.user.role == 'super_admin') {
+                  authBloc.add(LogoutEvent());
+                  // Navigation handled by auth listener, usually
+                } else {
+                  // Promoted Student/Staff -> Return to Dashboard
+                  context.go('/dashboard');
+                }
+              } else {
+                context.go('/');
+              }
             },
           ),
         ],
