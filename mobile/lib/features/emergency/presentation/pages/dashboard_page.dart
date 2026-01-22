@@ -106,14 +106,6 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Safe Campus'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.chat),
-            onPressed: () {
-              // Open Chat
-            },
-          ),
-        ],
       ),
       body: BlocConsumer<EmergencyBloc, EmergencyState>(
         listener: (context, state) {

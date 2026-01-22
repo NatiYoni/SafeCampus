@@ -55,6 +55,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp.router(
         title: 'SafeCampus',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.indigo,
           primaryColor: const Color(0xFF5C6BC0), // Indigo 400
