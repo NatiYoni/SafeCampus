@@ -19,7 +19,15 @@ class AuthAuthenticated extends AuthState {
   @override
   List<Object> get props => [user];
 }
+class AuthPasswordChangedSuccess extends AuthState {}
 
+class AuthPasswordChangeFailure extends AuthAuthenticated {
+  final String message;
+  const AuthPasswordChangeFailure(this.message, super.user);
+
+  @override
+  List<Object> get props => [message, user];
+}
 class AuthUnauthenticated extends AuthState {}
 
 class RegistrationSuccess extends AuthState {
