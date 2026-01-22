@@ -225,7 +225,7 @@ class _DashboardPageState extends State<DashboardPage> {
                            context,
                            'Friend Walk',
                            Icons.directions_walk,
-                           Colors.purple,
+                           Colors.cyan,
                            () => context.push('/friend-walk'),
                          ),
                          _buildQuickActionCard(

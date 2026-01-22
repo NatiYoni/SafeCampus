@@ -13,12 +13,16 @@ import 'features/emergency/presentation/bloc/emergency_event.dart';
 import 'features/emergency/presentation/pages/dashboard_page.dart';
 import 'features/friend_walk/presentation/bloc/friend_walk_bloc.dart';
 import 'features/friend_walk/presentation/pages/friend_walk_page.dart';
+// import 'features/campus_compass/presentation/pages/safety_radar_page.dart';
 import 'features/mental_health/presentation/bloc/mental_health_bloc.dart';
 import 'features/mental_health/presentation/pages/mental_health_page.dart';
+import 'features/mental_health/presentation/pages/mental_health_chat_page.dart';
 import 'features/reporting/presentation/bloc/reporting_bloc.dart';
 import 'features/reporting/presentation/pages/report_page.dart';
 import 'features/safety_timer/presentation/bloc/safety_timer_bloc.dart';
 import 'features/safety_timer/presentation/pages/safety_timer_page.dart';
+import 'features/admin/presentation/bloc/admin_walks_bloc.dart';
+import 'features/admin/presentation/bloc/admin_sos_bloc.dart';
 import 'features/admin/presentation/pages/admin_dashboard_page.dart';
 import 'features/admin/presentation/pages/admin_sos_page.dart';
 import 'features/admin/presentation/pages/admin_reports_page.dart';
@@ -43,6 +47,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => di.sl<AuthBloc>()..add(CheckAuthStatusEvent())),
         BlocProvider(create: (_) => di.sl<EmergencyBloc>()..add(CheckEmergencyStatus())),
         BlocProvider(create: (_) => di.sl<FriendWalkBloc>()),
+        BlocProvider(create: (_) => di.sl<AdminWalksBloc>()), 
+        BlocProvider(create: (_) => di.sl<AdminSosBloc>()),
         BlocProvider(create: (_) => di.sl<ReportingBloc>()),
         BlocProvider(create: (_) => di.sl<SafetyTimerBloc>()),
         BlocProvider(create: (_) => di.sl<MentalHealthBloc>()),
@@ -161,6 +167,12 @@ final GoRouter _router = GoRouter(
         return EmailVerificationScreen(email: email);
       },
     ),
+    /*
+    GoRoute(
+      path: '/safety-radar',
+      builder: (context, state) => const SafetyRadarPage(),
+    ),
+    */
     GoRoute(
       path: '/friend-walk',
       builder: (context, state) => const FriendWalkPage(),
@@ -177,6 +189,11 @@ final GoRouter _router = GoRouter(
       path: '/mental-health',
       builder: (context, state) => const MentalHealthPage(),
     ),
+    GoRoute(
+      path: '/mental-health/chat',
+      builder: (context, state) => const MentalHealthChatPage(),
+    ),
+
     GoRoute(
       path: '/home',
       builder: (context, state) => const HomeScreen(),

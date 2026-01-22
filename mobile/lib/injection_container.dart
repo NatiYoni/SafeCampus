@@ -37,13 +37,25 @@ import 'features/friend_walk/domain/repositories/friend_walk_repository.dart';
 import 'features/friend_walk/domain/usecases/start_walk.dart';
 import 'features/friend_walk/domain/usecases/update_location.dart';
 import 'features/friend_walk/domain/usecases/end_walk.dart';
+import 'features/friend_walk/domain/usecases/get_all_active_walks.dart';
 import 'features/friend_walk/presentation/bloc/friend_walk_bloc.dart';
+import 'features/admin/presentation/bloc/admin_walks_bloc.dart';
+
+import 'features/campus_compass/data/datasources/campus_compass_remote_data_source.dart';
+import 'features/campus_compass/data/repositories/campus_compass_repository_impl.dart';
+import 'features/campus_compass/domain/repositories/campus_compass_repository.dart';
+import 'features/campus_compass/domain/usecases/send_heartbeat.dart';
+import 'features/campus_compass/domain/usecases/get_campus_status.dart';
+import 'features/campus_compass/presentation/bloc/campus_compass_bloc.dart';
 
 import 'features/mental_health/data/datasources/mental_health_remote_data_source.dart';
 import 'features/mental_health/data/repositories/mental_health_repository_impl.dart';
 import 'features/mental_health/domain/repositories/mental_health_repository.dart';
 import 'features/mental_health/domain/usecases/get_mental_health_resources.dart';
+import 'features/mental_health/domain/usecases/send_chat_to_companion.dart';
 import 'features/mental_health/presentation/bloc/mental_health_bloc.dart';
+import 'features/mental_health/presentation/bloc/chat/mental_health_chat_bloc.dart';
+
 
 import 'features/reporting/data/datasources/reporting_remote_data_source.dart';
 import 'features/reporting/data/repositories/reporting_repository_impl.dart';
@@ -135,10 +147,27 @@ Future<void> init() async {
   sl.registerLazySingleton(() => StartWalk(sl()));
   sl.registerLazySingleton(() => UpdateWalkLocation(sl()));
   sl.registerLazySingleton(() => EndWalk(sl()));
+  sl.registerLazySingleton(() => GetAllActiveWalks(sl()));
   // Repository
   sl.registerLazySingleton<FriendWalkRepository>(() => FriendWalkRepositoryImpl(remoteDataSource: sl()));
   // Data sources
   sl.registerLazySingleton<FriendWalkRemoteDataSource>(() => FriendWalkRemoteDataSourceImpl(client: sl()));
+
+  //! Features - Campus Compass
+  // Bloc
+  sl.registerFactory(() => CampusCompassBloc(
+        sendHeartbeat: sl(),
+        getCampusStatus: sl(),
+      ));
+  // Use cases
+  sl.registerLazySingleton(() => SendHeartbeat(sl()));
+  sl.registerLazySingleton(() => GetCampusStatus(sl()));
+  // Repository
+  sl.registerLazySingleton<CampusCompassRepository>(
+      () => CampusCompassRepositoryImpl(remoteDataSource: sl()));
+  // Data sources
+  sl.registerLazySingleton<CampusCompassRemoteDataSource>(
+      () => CampusCompassRemoteDataSourceImpl(client: sl()));
 
   //! Features - Reporting
   // Bloc
@@ -152,6 +181,7 @@ Future<void> init() async {
   sl.registerLazySingleton<ReportingRemoteDataSource>(() => ReportingRemoteDataSourceImpl(client: sl()));
 
   //! Admin Features
+  sl.registerFactory(() => AdminWalksBloc(getAllActiveWalks: sl()));
   sl.registerFactory(() => AdminSosBloc(getAlerts: sl()));
 
   //! Features - Safety Timer
@@ -168,8 +198,10 @@ Future<void> init() async {
   // Mental Health Feature
   // Bloc
   sl.registerFactory(() => MentalHealthBloc(getResources: sl()));
+  sl.registerFactory(() => MentalHealthChatBloc(sendChat: sl()));
   // Use cases
   sl.registerLazySingleton(() => GetMentalHealthResources(sl()));
+  sl.registerLazySingleton(() => SendChatToCompanion(sl()));
   // Repository
   sl.registerLazySingleton<MentalHealthRepository>(() => MentalHealthRepositoryImpl(remoteDataSource: sl()));
   // Data sources
