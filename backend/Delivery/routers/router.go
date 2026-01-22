@@ -56,6 +56,7 @@ func SetupRouter(
 
 		// Zone Check (Simulating Geofence background check)
 		api.POST("/zone/check", zoneHandler.CheckZone)
+		api.GET("/zones", zoneHandler.GetAllZones)
 
 		// Walk routes
 		api.POST("/walks/start", walkHandler.StartWalk)
@@ -69,6 +70,7 @@ func SetupRouter(
 
 		// Mental Health routes
 		api.GET("/mental-health", mentalHandler.GetResources)
+		api.POST("/mental-health/chat", mentalHandler.ChatWithCompanion)
 
 		// Campus Radar routes
 		api.POST("/campus/heartbeat", campusHandler.Heartbeat)
