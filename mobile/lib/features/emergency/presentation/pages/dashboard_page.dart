@@ -107,6 +107,12 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Safe Campus'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.push('/settings'),
+          ),
+        ],
       ),
       body: BlocConsumer<EmergencyBloc, EmergencyState>(
         listener: (context, state) {
@@ -241,6 +247,13 @@ class _DashboardPageState extends State<DashboardPage> {
                            Icons.favorite,
                            Colors.teal,
                            () => context.push('/mental-health'),
+                         ),
+                         _buildQuickActionCard(
+                           context,
+                           'Campus News',
+                           Icons.article,
+                           Colors.indigo,
+                           () => context.push('/articles'),
                          ),
                        ],
                      ),
