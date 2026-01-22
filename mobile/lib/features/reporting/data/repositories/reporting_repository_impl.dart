@@ -28,4 +28,14 @@ class ReportingRepositoryImpl implements ReportingRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> resolveReport(String id) async {
+    try {
+      await remoteDataSource.resolveReport(id);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
