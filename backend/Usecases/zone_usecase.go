@@ -9,6 +9,7 @@ import (
 
 type ZoneUsecase interface {
 	CheckAndNotify(ctx context.Context, userID string, location domain.Location) (*domain.Zone, error)
+	GetAllZones(ctx context.Context) ([]*domain.Zone, error)
 }
 
 type zoneUsecase struct {
@@ -21,6 +22,12 @@ func NewZoneUsecase(zoneRepo domain.ZoneRepository, timeout time.Duration) ZoneU
 		zoneRepo:       zoneRepo,
 		contextTimeout: timeout,
 	}
+}
+
+func (z *zoneUsecase) GetAllZones(ctx context.Context) ([]*domain.Zone, error) {
+	ctx, cancel := context.WithTimeout(ctx, z.contextTimeout)
+	defer cancel()
+	return z.zoneRepo.GetAll(ctx)
 }
 
 func (z *zoneUsecase) CheckAndNotify(ctx context.Context, userID string, location domain.Location) (*domain.Zone, error) {
