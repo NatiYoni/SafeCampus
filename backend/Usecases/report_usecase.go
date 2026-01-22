@@ -12,6 +12,7 @@ import (
 type ReportUsecase interface {
 	SubmitReport(ctx context.Context, report *domain.Report) error
 	GetReports(ctx context.Context) ([]*domain.Report, error)
+	ResolveReport(ctx context.Context, id string) error
 }
 
 type reportUsecase struct {
@@ -52,4 +53,10 @@ func (r *reportUsecase) GetReports(ctx context.Context) ([]*domain.Report, error
 	ctx, cancel := context.WithTimeout(ctx, r.contextTimeout)
 	defer cancel()
 	return r.reportRepo.FetchAll(ctx, nil)
+}
+
+func (r *reportUsecase) ResolveReport(ctx context.Context, id string) error {
+	ctx, cancel := context.WithTimeout(ctx, r.contextTimeout)
+	defer cancel()
+	return r.reportRepo.UpdateStatus(ctx, id, "Resolved")
 }
