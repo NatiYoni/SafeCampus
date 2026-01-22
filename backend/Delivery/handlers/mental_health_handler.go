@@ -45,4 +45,3 @@ func (h *MentalHealthHandler) ChatWithCompanion(c *gin.Context) {
 
 	c.JSON(http.StatusOK, domain.AIChatResponse{Response: response})
 }
-
