@@ -33,9 +33,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             ScaffoldMessenger.of(context).showSnackBar(
                const SnackBar(content: Text('Password changed. Please log in again.')),
             );
-            // Router will likely handle the redirect because Auth state is no longer Authenticated?
-            // Wait, if I used 'AuthPasswordChangedSuccess', it's NOT 'AuthAuthenticated'.
-            // So router redirect logic will kick in.
+
           } else if (state is AuthPasswordChangeFailure) {
              ScaffoldMessenger.of(context).showSnackBar(
                SnackBar(content: Text('Error: ${state.message}')),
