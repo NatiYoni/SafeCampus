@@ -43,6 +43,7 @@ type ReportRepository interface {
 	Create(ctx context.Context, report *Report) error
 	GetByID(ctx context.Context, id string) (*Report, error)
 	FetchAll(ctx context.Context, filter map[string]interface{}) ([]*Report, error)
+	UpdateStatus(ctx context.Context, id string, status string) error
 }
 
 // ChatRepository defines the interface for chat persistence.
