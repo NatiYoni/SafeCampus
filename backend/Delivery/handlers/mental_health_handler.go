@@ -24,6 +24,9 @@ func (h *MentalHealthHandler) GetResources(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	if resources == nil {
+		resources = []*domain.MentalHealthResource{}
+	}
 	c.JSON(http.StatusOK, resources)
 }
 
