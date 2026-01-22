@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -140,7 +141,7 @@ func (u *mentalHealthUsecase) GetAICompanionResponse(ctx context.Context, messag
 		return "I apologize, but I am currently offline. Please contact support.", nil
 	}
 
-	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey
+	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey
 
 	// Construct request body for Gemini
 	type GeminiPart struct {
@@ -200,7 +201,8 @@ func (u *mentalHealthUsecase) GetAICompanionResponse(ctx context.Context, messag
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("AI API returned status: %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("AI API error (status %d): %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	// Parse Response
