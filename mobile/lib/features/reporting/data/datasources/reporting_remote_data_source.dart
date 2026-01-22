@@ -5,6 +5,7 @@ import '../../domain/entities/report.dart';
 abstract class ReportingRemoteDataSource {
   Future<ReportModel> createReport(String userId, String category, String description, bool isAnonymous);
   Future<List<ReportModel>> getReports();
+  Future<void> resolveReport(String id);
 }
 
 class ReportingRemoteDataSourceImpl implements ReportingRemoteDataSource {
@@ -38,5 +39,10 @@ class ReportingRemoteDataSourceImpl implements ReportingRemoteDataSource {
   Future<List<ReportModel>> getReports() async {
     final response = await client.get('/api/reports');
     return (response.data as List).map((e) => ReportModel.fromJson(e)).toList();
+  }
+
+  @override
+  Future<void> resolveReport(String id) async {
+    await client.put('/api/reports/$id/resolve');
   }
 }
