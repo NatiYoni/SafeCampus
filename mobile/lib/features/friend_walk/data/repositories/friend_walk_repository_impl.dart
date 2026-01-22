@@ -38,4 +38,14 @@ class FriendWalkRepositoryImpl implements FriendWalkRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<WalkSession>>> getAllActiveWalks() async {
+    try {
+      final sessions = await remoteDataSource.getAllActiveWalks();
+      return Right(sessions);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

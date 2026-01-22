@@ -6,6 +6,7 @@ abstract class FriendWalkRemoteDataSource {
   Future<WalkSessionModel> startWalk(String userId, String guardianId);
   Future<void> updateLocation(String walkId, double lat, double lng);
   Future<void> endWalk(String walkId);
+  Future<List<WalkSessionModel>> getAllActiveWalks();
 }
 
 class FriendWalkRemoteDataSourceImpl implements FriendWalkRemoteDataSource {
@@ -39,5 +40,13 @@ class FriendWalkRemoteDataSourceImpl implements FriendWalkRemoteDataSource {
   @override
   Future<void> endWalk(String walkId) async {
     await client.post('/api/walks/$walkId/end');
+  }
+
+  @override
+  Future<List<WalkSessionModel>> getAllActiveWalks() async {
+    final response = await client.get('/api/walks/active');
+    final List<dynamic>? data = response.data;
+    if (data == null) return [];
+    return data.map((json) => WalkSessionModel.fromJson(json)).toList();
   }
 }
