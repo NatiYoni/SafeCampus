@@ -49,6 +49,11 @@ func SetupRouter(
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware(jwtService))
 	{
+		// User Profile routes
+		api.GET("/profile/:id", userHandler.GetProfile) // ID param is optional if we trust token but handler uses Param
+		api.PUT("/profile", userHandler.UpdateProfile)
+		api.POST("/profile/change-password", userHandler.ChangePassword)
+
 		// Articles (Public/Student view)
 		api.GET("/articles", articleHandler.GetArticles)
 
