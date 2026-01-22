@@ -22,6 +22,7 @@ type UserUsecase interface {
 	RefreshToken(ctx context.Context, refreshToken string) (string, error) // Returns new accessToken
 	GetProfile(ctx context.Context, id string) (*domain.User, error)
 	UpdateProfile(ctx context.Context, user *domain.User) error
+	ChangePassword(ctx context.Context, userID, oldPassword, newPassword string) error
 	AddEmergencyContact(ctx context.Context, userID string, contact domain.Contact) error
 	GetByUniversityID(ctx context.Context, uniID string) (*domain.User, error)
 
@@ -287,6 +288,31 @@ func (u *userUsecase) GetProfile(ctx context.Context, id string) (*domain.User, 
 func (u *userUsecase) UpdateProfile(ctx context.Context, user *domain.User) error {
 	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()
+	return u.userRepo.Update(ctx, user)
+}
+
+func (u *userUsecase) ChangePassword(ctx context.Context, userID, oldPassword, newPassword string) error {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	user, err := u.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(oldPassword))
+	if err != nil {
+		return errors.New("incorrect old password")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.PasswordHash = string(hashedPassword)
+	user.RefreshToken = "" // Force re-login
+
 	return u.userRepo.Update(ctx, user)
 }
 
