@@ -21,14 +21,11 @@ func seedAdminUser(db *mongo.Database) {
 }
 
 func main() {
-	// Load .env file if it exists (for local development)
 	_ = godotenv.Load()
 
 	// 1. Database Connection
 	mongoURI := os.Getenv("MONGO_URI")
 	if mongoURI == "" {
-		// Fallback for local testing if env is not provided.
-		// For Render, you MUST set MONGO_URI in the interface.
 		mongoURI = "mongodb://localhost:27017"
 		log.Println("MONGO_URI not set, using default: " + mongoURI)
 	}
@@ -38,7 +35,6 @@ func main() {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
 
-	// Use the "safecampus" database
 	db := client.Database("safecampus")
 
 	// 1.5 Seed Admin User (Removed)
@@ -62,7 +58,7 @@ func main() {
 	chatRepo := repositories.NewChatRepository(db)
 	zoneRepo := repositories.NewZoneRepository(db)
 	walkRepo := repositories.NewWalkRepository(db)
-	campusRepo := repositories.NewCampusRepository(db) // Added CampusRepo
+	campusRepo := repositories.NewCampusRepository(db) 
 	timerRepo := repositories.NewSafetyTimerRepository(db)
 	mentalRepo := repositories.NewMentalHealthRepository(db)
 	articleRepo := repositories.NewArticleRepository(db)
@@ -81,7 +77,7 @@ func main() {
 	chatUsecase := usecases.NewChatUsecase(chatRepo, timeout)
 	zoneUsecase := usecases.NewZoneUsecase(zoneRepo, timeout)
 	walkUsecase := usecases.NewWalkUseCase(walkRepo)
-	campusUsecase := usecases.NewCampusUseCase(campusRepo) // Added CampusUseCase, no timeout passed in constructor logic provided earlier
+	campusUsecase := usecases.NewCampusUseCase(campusRepo)
 	timerUsecase := usecases.NewSafetyTimerUsecase(timerRepo, timeout)
 	mentalUsecase := usecases.NewMentalHealthUsecase(mentalRepo, timeout)
 	articleUsecase := usecases.NewArticleUsecase(articleRepo, userRepo, timeout)
@@ -93,7 +89,7 @@ func main() {
 	chatHandler := handlers.NewChatHandler(chatUsecase)
 	zoneHandler := handlers.NewZoneHandler(zoneUsecase)
 	walkHandler := handlers.NewWalkHandler(walkUsecase)
-	campusHandler := handlers.NewCampusHandler(campusUsecase) // Added CampusHandler
+	campusHandler := handlers.NewCampusHandler(campusUsecase) 
 	timerHandler := handlers.NewSafetyTimerHandler(timerUsecase)
 	mentalHandler := handlers.NewMentalHealthHandler(mentalUsecase)
 	articleHandler := handlers.NewArticleHandler(articleUsecase)

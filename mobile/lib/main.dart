@@ -13,7 +13,6 @@ import 'features/emergency/presentation/bloc/emergency_event.dart';
 import 'features/emergency/presentation/pages/dashboard_page.dart';
 import 'features/friend_walk/presentation/bloc/friend_walk_bloc.dart';
 import 'features/friend_walk/presentation/pages/friend_walk_page.dart';
-// import 'features/campus_compass/presentation/pages/safety_radar_page.dart';
 import 'features/mental_health/presentation/bloc/mental_health_bloc.dart';
 import 'features/mental_health/presentation/pages/mental_health_page.dart';
 import 'features/mental_health/presentation/pages/mental_health_chat_page.dart';
@@ -91,7 +90,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Simple Home Screen Placeholder
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -140,7 +138,6 @@ final GoRouter _router = GoRouter(
        return null;
     }
 
-    // Checking authentication for protected routes
     if (authState is! AuthAuthenticated) {
         // If not authenticated, always go to welcome (or login)
         return '/';
@@ -151,7 +148,6 @@ final GoRouter _router = GoRouter(
     final isOnAdminRoute = state.uri.toString().startsWith('/admin');
 
     // 1. Super Admin: forced to /admin if trying to access other routes (User Dashboard)
-    // Assuming Super Admin strictly works on Admin Console.
     if (userRole == 'super_admin' && !isOnAdminRoute) {
       return '/admin';
     }

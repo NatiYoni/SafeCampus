@@ -17,7 +17,7 @@ class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
       emit(ArticleLoading());
       final result = await getArticles(NoParams());
       result.fold(
-        (failure) => emit(ArticleError(failure.message)), // Assuming Failure has a message property or map failure to string
+        (failure) => emit(ArticleError(failure.message)), // Assuming Failure has map failure to string  or a message property
         (articles) => emit(ArticlesLoaded(articles)),
       );
     });
@@ -29,7 +29,7 @@ class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
         (failure) => emit(ArticleError(failure.message)),
         (_) {
              emit(ArticleCreated());
-             add(FetchArticlesRequested()); // Reload list after creation
+             add(FetchArticlesRequested()); // It reload list after creation
         },
       );
     });
