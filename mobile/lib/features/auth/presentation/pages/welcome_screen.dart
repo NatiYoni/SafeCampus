@@ -37,16 +37,6 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'SafeCampus',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
                 'Stay Safe. Stay Connected.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
